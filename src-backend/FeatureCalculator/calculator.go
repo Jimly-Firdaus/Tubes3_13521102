@@ -89,10 +89,16 @@ func CalculateExpression(expression string) (string, error) {
     } else if (expression[i] == ')') { // If current token is an closing parenthesis then solve expression until opening parenthesis is found
       for {
 
-        // All err is for handling Syntax error
+        // If the expression contains parenthesis that contains nothing then return error
+        if (expression[i-1] == '(') {
+          return "", fmt.Errorf("Invalid Syntax")
+        }
+
         if (operatorStack.IsEmpty()) {
           break
         }
+
+        // All err is for handling Syntax error
 
         op, _ := operatorStack.Peek()
 
@@ -209,7 +215,6 @@ func CalculateExpression(expression string) (string, error) {
     if (err != nil) {
       return "", err
     }
-    fmt.Println(hasil)
     valueStack.Push(hasil)
   }
   return valueStack.Peek()
