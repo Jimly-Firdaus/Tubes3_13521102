@@ -19,6 +19,7 @@ const scrollToBottom = () => {
     );
   }
 };
+// TODO: chat history
 
 // Perform fetching data to fill this array
 const messages: Message[] = reactive([]);
