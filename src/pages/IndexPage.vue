@@ -42,6 +42,7 @@ const { animateMessage, random } = useUtility({
 const method = ref("");
 
 const sendMessage = () => {
+  isResponding.value = true;
   scrollToBottom();
   const userMessage = new Message(
     messages.length + 1,
@@ -54,7 +55,6 @@ const sendMessage = () => {
   messages.push(userMessage);
   userInput.value = "";
   setTimeout(async () => {
-    isResponding.value = true;
     // Fetch response from backend
     botFullResponse.value = dummyResponse[random()];
 
@@ -126,28 +126,29 @@ onMounted(() => scrollToBottom());
             ref="scrollArea"
           >
             <div class="tw-w-full">
-              <transition name="typing">
+              <transition name="scale">
                 <q-chat-message name="BOT" :avatar="botAvatar" bg-color="amber">
                   <div class="text-lg-body">Hi, how can i help you today ?</div>
                 </q-chat-message>
               </transition>
               <div v-for="message in messages" :key="message.getId()">
-                <q-chat-message
-                  :sent="message.getStatus()"
-                  :label="message.getSentTime()"
-                  text-color="white"
-                  bg-color="primary"
-                  :avatar="userAvatar"
-                >
-                  <div class="text-lg-body">{{ message.getText() }}</div>
-                </q-chat-message>
-
+                <transition name="scale">
+                  <q-chat-message
+                    :sent="message.getStatus()"
+                    :label="message.getSentTime()"
+                    text-color="white"
+                    bg-color="primary"
+                    :avatar="userAvatar"
+                  >
+                    <div class="text-lg-body">{{ message.getText() }}</div>
+                  </q-chat-message>
+                </transition>
                 <q-chat-message name="BOT" :avatar="botAvatar" bg-color="amber">
                   <template v-if="message.getResponseCode() === 0">
                     <q-spinner-dots size="2rem" />
                   </template>
                   <template v-else>
-                    <transition name="typing">
+                    <transition name="scale">
                       <div class="text-lg-body">
                         <template
                           v-if="
@@ -185,7 +186,11 @@ onMounted(() => scrollToBottom());
                 size="md"
                 round
                 color="primary"
-                :disable="isResponding || userInput.length === 0 || userInput === undefined"
+                :disable="
+                  isResponding ||
+                  userInput.length === 0 ||
+                  userInput === undefined
+                "
               />
             </div>
           </div>
