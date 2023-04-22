@@ -1,12 +1,16 @@
 <script setup lang="ts">
 import { Message } from "src/constants/message";
-import { ref, Ref, watch, reactive, onMounted } from "vue";
-import { QScrollArea } from "quasar";
+import { ref, Ref, watch, reactive, onMounted, computed } from "vue";
+import { QScrollArea, useQuasar } from "quasar";
 import { dummyResponse } from "src/constants/history";
 import { useUtility } from "src/composables/useUtility";
 import { botAvatar, userAvatar } from "src/constants/avatar";
 
-const splitter = ref(20);
+const $q = useQuasar();
+const BREAKPOINT = 800;
+const isSmallScreen = computed(() => $q.screen.width < BREAKPOINT);
+
+const splitter = computed(() => (isSmallScreen.value ? 0 : 20));
 const scrollArea = ref<QScrollArea | null>(null);
 const scrollToBottom = () => {
   const scrollTarget = scrollArea.value?.getScrollTarget();
@@ -26,6 +30,7 @@ const messages: Message[] = reactive([]);
 const userInput: Ref<string> = ref("");
 const botResponse: Ref<string> = ref("");
 const botFullResponse: Ref<string> = ref("");
+const isResponding: Ref<boolean> = ref(false);
 
 const { animateMessage, random } = useUtility({
   startNum: 1,
@@ -49,6 +54,7 @@ const sendMessage = () => {
   messages.push(userMessage);
   userInput.value = "";
   setTimeout(async () => {
+    isResponding.value = true;
     // Fetch response from backend
     botFullResponse.value = dummyResponse[random()];
 
@@ -59,6 +65,7 @@ const sendMessage = () => {
     await animateMessage(botFullResponse.value);
     messages[messages.length - 1].setResponseStatus(true);
     botResponse.value = "";
+    isResponding.value = false;
   }, 1500);
 };
 
@@ -169,6 +176,7 @@ onMounted(() => scrollToBottom());
               autogrow
               outlined
               rounded
+              :disable="isResponding"
             />
             <div>
               <q-btn
@@ -177,6 +185,7 @@ onMounted(() => scrollToBottom());
                 size="md"
                 round
                 color="primary"
+                :disable="isResponding || userInput.length === 0 || userInput === undefined"
               />
             </div>
           </div>
@@ -191,7 +200,7 @@ onMounted(() => scrollToBottom());
   :deep(.q-scrollarea__content) {
     display: flex;
     width: 100% !important;
-    align-items: end !important;
+    align-items: flex-end !important;
     position: relative;
   }
 }
