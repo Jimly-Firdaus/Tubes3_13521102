@@ -4,13 +4,15 @@ export class Message {
   private text: string;
   private response: string;
   private responseStatusCode: number;
+  private sentTime: string;
 
-  constructor(id: number, sent: boolean, text: string) {
+  constructor(id: number, sent: boolean, text: string, sentTime: string) {
     this.id = id;
     this.sent = sent;
     this.text = text;
     this.response = '';
     this.responseStatusCode = 0;
+    this.sentTime = sentTime;
   }
 
   public getId(): number {
@@ -33,7 +35,11 @@ export class Message {
     return this.responseStatusCode;
   }
 
-  public setResponse(text: string, statusCode: number) {
+  public getSentTime(): string {
+    return this.sentTime;
+  }
+
+  public setResponse(text: string, statusCode: number): void {
     this.response = text;
     this.responseStatusCode = statusCode;
   }
