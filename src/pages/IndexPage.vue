@@ -42,31 +42,33 @@ const { animateMessage, random } = useUtility({
 const method = ref("");
 
 const sendMessage = () => {
-  isResponding.value = true;
-  scrollToBottom();
-  const userMessage = new Message(
-    messages.length + 1,
-    true,
-    userInput.value,
-    new Date().toLocaleTimeString()
-  );
+  if (!isResponding.value) {
+    isResponding.value = true;
+    scrollToBottom();
+    const userMessage = new Message(
+      messages.length + 1,
+      true,
+      userInput.value,
+      new Date().toLocaleTimeString()
+    );
 
-  // Send request to backend
-  messages.push(userMessage);
-  userInput.value = "";
-  setTimeout(async () => {
-    // Fetch response from backend
-    botFullResponse.value = dummyResponse[random()];
+    // Send request to backend
+    messages.push(userMessage);
+    userInput.value = "";
+    setTimeout(async () => {
+      // Fetch response from backend
+      botFullResponse.value = dummyResponse[random()];
 
-    // Store the result
-    messages[messages.length - 1].setResponse(botFullResponse.value, 200);
+      // Store the result
+      messages[messages.length - 1].setResponse(botFullResponse.value, 200);
 
-    // Show result
-    await animateMessage(botFullResponse.value);
-    messages[messages.length - 1].setResponseStatus(true);
-    botResponse.value = "";
-    isResponding.value = false;
-  }, 1500);
+      // Show result
+      await animateMessage(botFullResponse.value);
+      messages[messages.length - 1].setResponseStatus(true);
+      botResponse.value = "";
+      isResponding.value = false;
+    }, 1500);
+  }
 };
 
 watch(messages, () => {
@@ -126,43 +128,37 @@ onMounted(() => scrollToBottom());
             ref="scrollArea"
           >
             <div class="tw-w-full">
-              <transition name="scale">
-                <q-chat-message name="BOT" :avatar="botAvatar" bg-color="amber">
-                  <div class="text-lg-body">Hi, how can i help you today ?</div>
-                </q-chat-message>
-              </transition>
+              <q-chat-message name="BOT" :avatar="botAvatar" bg-color="amber">
+                <div class="text-lg-body">Hi, how can i help you today ?</div>
+              </q-chat-message>
               <div v-for="message in messages" :key="message.getId()">
-                <transition name="scale">
-                  <q-chat-message
-                    :sent="message.getStatus()"
-                    :label="message.getSentTime()"
-                    text-color="white"
-                    bg-color="primary"
-                    :avatar="userAvatar"
-                  >
-                    <div class="text-lg-body">{{ message.getText() }}</div>
-                  </q-chat-message>
-                </transition>
+                <q-chat-message
+                  :sent="message.getStatus()"
+                  text-color="white"
+                  bg-color="primary"
+                  :avatar="userAvatar"
+                  :stamp="message.getSentTime()"
+                >
+                  <div class="text-lg-body">{{ message.getText() }}</div>
+                </q-chat-message>
                 <q-chat-message name="BOT" :avatar="botAvatar" bg-color="amber">
                   <template v-if="message.getResponseCode() === 0">
                     <q-spinner-dots size="2rem" />
                   </template>
                   <template v-else>
-                    <transition name="scale">
-                      <div class="text-lg-body">
-                        <template
-                          v-if="
-                            botResponse.length !== botFullResponse.length &&
-                            !message.getResponseStatus()
-                          "
-                        >
-                          {{ botResponse }}
-                        </template>
-                        <template v-else>
-                          {{ message.getResponseMsg() }}
-                        </template>
-                      </div>
-                    </transition>
+                    <div class="text-lg-body">
+                      <template
+                        v-if="
+                          botResponse.length !== botFullResponse.length &&
+                          !message.getResponseStatus()
+                        "
+                      >
+                        {{ botResponse }}
+                      </template>
+                      <template v-else>
+                        {{ message.getResponseMsg() }}
+                      </template>
+                    </div>
                   </template>
                 </q-chat-message>
               </div>
@@ -177,7 +173,6 @@ onMounted(() => scrollToBottom());
               autogrow
               outlined
               rounded
-              :disable="isResponding"
             />
             <div>
               <q-btn
@@ -218,15 +213,17 @@ onMounted(() => scrollToBottom());
 :deep(.q-field__native) {
   font-size: 20px;
 }
-.typing-enter-active {
-  animation: typing 2s;
+
+.q-message {
+  animation: scale-in 0.5s;
 }
-@keyframes typing {
+
+@keyframes scale-in {
   from {
-    width: 0;
+    transform: scale(0);
   }
   to {
-    width: 100%;
+    transform: scale(1);
   }
 }
 </style>
