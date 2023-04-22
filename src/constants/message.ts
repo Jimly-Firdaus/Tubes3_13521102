@@ -44,7 +44,7 @@ export class Message {
   public getResponseStatus(): boolean {
     return this.responded;
   }
-  
+
   public setResponseStatus(status: boolean) {
     this.responded = status;
   }
@@ -54,3 +54,5 @@ export class Message {
     this.responseStatusCode = statusCode;
   }
 }
+
+// TODO sent request to backend struct
