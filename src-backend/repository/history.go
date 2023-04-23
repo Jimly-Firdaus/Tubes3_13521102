@@ -32,14 +32,14 @@ func GetAllHistory(db *sql.DB) (results []structs.History, err error) {
 }
 
 func InsertHistory(db *sql.DB, history structs.History) (error) {
-  errs := db.QueryRow("INSERT INTO History (historyTitle) VALUES (?)", history.HistoryTitle)
+  errs := db.QueryRow("INSERT INTO History (historyTitle) VALUES ($1)", history.HistoryTitle)
 
   return errs.Err()
 }
 
 
 func DeleteHistory(db *sql.DB, history structs.History) (error) {
-  res, errs := db.Exec("DELETE FROM History WHERE historyID = ?", history.HistoryID)
+  res, errs := db.Exec("DELETE FROM History WHERE historyID = $1", history.HistoryID)
   n, _ := res.RowsAffected()
 
   if errs != nil {
@@ -54,7 +54,7 @@ func DeleteHistory(db *sql.DB, history structs.History) (error) {
 }
 
 func UpdateHistory(db *sql.DB, history structs.History) (error) {
-  res, errs := db.Exec("UPDATE History SET historyTitle = ? WHERE historyID = ?", history.HistoryTitle, history.HistoryID)
+  res, errs := db.Exec("UPDATE History SET historyTitle = $1 WHERE historyID = $2", history.HistoryTitle, history.HistoryID)
   n, _ := res.RowsAffected()
 
   if errs != nil {
@@ -69,7 +69,7 @@ func UpdateHistory(db *sql.DB, history structs.History) (error) {
 }
 
 func GetHistoryByHistoryID(db *sql.DB, historyID int64) (results []structs.History, err error) {
-  rows, err := db.Query("SELECT * FROM History WHERE historyID = ?", historyID)
+  rows, err := db.Query("SELECT * FROM History WHERE historyID = $1", historyID)
 
   if err != nil {
     panic(err)
