@@ -35,8 +35,9 @@ func InsertBotResponse(db *sql.DB, newResponse structs.BotResponse) (error) {
   return err.Err()
 }
 
+// Deleting BotResponse based on its question
 func DeleteBotResponse(db *sql.DB, botResponse structs.BotResponse) (error) {
-  res, errs := db.Exec("DELETE FROM BotResponse WHERE responseID = $1", botResponse.ResponseID)
+  res, errs := db.Exec("DELETE FROM BotResponse WHERE question = $1", botResponse.Question)
   n, _ := res.RowsAffected()
 
   if errs != nil {
@@ -49,6 +50,7 @@ func DeleteBotResponse(db *sql.DB, botResponse structs.BotResponse) (error) {
   return nil
 }
 
+// Updating BotResponse based on its question
 func UpdateBotResponse(db *sql.DB, botResponse structs.BotResponse) (error) {
   res, errs := db.Exec("UPDATE BotResponse SET answer = $1 WHERE question = $2", botResponse.Answer, botResponse.Question)
   n, _ := res.RowsAffected()
