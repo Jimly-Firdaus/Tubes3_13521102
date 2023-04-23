@@ -1,6 +1,7 @@
 package structs
 
 type PertanyaanTopik struct {
-  idPertanyaan int64  `json:"id_pertanyaan"`
-  idTopik      int64  `json:"id_topik"`
+  IdPertanyaan int64      `json:"id_pertanyaan"`
+  IdTopik      int64      `json:"id_topik"`
+  Pertanyaan   Pertanyaan `json:"pertanyaan"`
 }

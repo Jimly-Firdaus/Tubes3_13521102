@@ -1,6 +1,6 @@
 package structs
 
 type Topik struct {
-  idTopik    int64    `json:"id_topik"`
-  topikUtama string   `json:"topik_utama"`
+  IdTopik    int64    `json:"id_topik"`
+  TopikUtama string   `json:"topik_utama"`
 }
