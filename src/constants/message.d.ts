@@ -22,6 +22,7 @@ export interface MessageHistory {
 export interface Request {
   message: Message;
   method: "KMP" | "BoyerMoore";
+  requestModify?: boolean;
 }
 
 // Future use --ignore this
