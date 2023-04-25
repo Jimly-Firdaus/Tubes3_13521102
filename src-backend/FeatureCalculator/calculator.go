@@ -83,8 +83,12 @@ func CalculateExpression(expression string) (string, error) {
     if (expression[i] == ' ') {
       continue
     } else if (expression[i] == '(') { // If current token is an opening parenthesis push the token
-
       operatorStack.Push(string(expression[i]))
+      if (i != len(expression)-1){ // If '(' is not the last character in expression and a minus exist after this expression
+        if (expression[i+1] == '-'){ // if a minus appears after opening paranthesis, push a 0 number value.
+          valueStack.Push("0")
+        }
+      }
 
     } else if (expression[i] == ')') { // If current token is an closing parenthesis then solve expression until opening parenthesis is found
       for {

@@ -1,4 +1,6 @@
-package FeatureStringmatching
+package main
+
+import "fmt"
 
 func buildLast(pattern string) [128]int {
 	var last [128]int
@@ -23,11 +25,11 @@ func bmMatch(text, pattern string) int {
 		if pattern[j] == text[i] {
 			if j == 0 {
 				return i
-			} else {
+			} else { // Option 1
 				i--
 				j--
 			}
-		} else {
+		} else { // Option 2
 			lo := last[text[i]]
 			i += m - min(j, 1+lo)
 			j = m - 1
@@ -43,16 +45,16 @@ func min(a, b int) int {
 	return b
 }
 // tester
-// func main() {
-// 	var text, pattern string
-// 	text = "Apa Ibukota Indonesia"
-// 	pattern = "Ibukota Indonesia"
-// 	fmt.Println("Text:", text)
-// 	fmt.Println("Pattern:", pattern)
-// 	posn := bmMatch(text, pattern)
-// 	if posn == -1 {
-// 		fmt.Println("Pattern not found")
-// 	} else {
-// 		fmt.Println("Pattern starts at posn", posn)
-// 	}
-// }
+func main() {
+	var text, pattern string
+	text = "Apa Ibukota Indonesia?"
+	pattern = "Ibukota Indo"
+	fmt.Println("Text:", text)
+	fmt.Println("Pattern:", pattern)
+	posn := bmMatch(text, pattern)
+	if posn == -1 {
+		fmt.Println("Pattern not found")
+	} else {
+		fmt.Println("Pattern starts at posn", posn)
+	}
+}

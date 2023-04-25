@@ -1,13 +1,14 @@
 package main
 
 import (
-    "database/sql"
-    "fmt"
-    "log"
-    "TUBES3_13521102/src-backend/featureDate"
-    "TUBES3_13521102/src-backend/featureCalculator"
-    "TUBES3_13521102/src-backend/database"
-    _ "github.com/go-sql-driver/mysql"
+	"TUBES3_13521102/src-backend/database"
+	FeatureCalculator "TUBES3_13521102/src-backend/featureCalculator"
+	FeatureDate "TUBES3_13521102/src-backend/featureDate"
+	"database/sql"
+	"fmt"
+	"log"
+
+	_ "github.com/go-sql-driver/mysql"
 )
 
 // Variables to connect to database host
@@ -25,7 +26,7 @@ func main() {
     dayName := FeatureDate.DateDayName(date)
     fmt.Println(dayName)
 
-    hasil, err := FeatureCalculator.CalculateExpression("8 + 7 + 2+* 5")
+    hasil, err := FeatureCalculator.CalculateExpression("((-8.05) + 3)")
 
     if (err != nil) {
       fmt.Println(err)
