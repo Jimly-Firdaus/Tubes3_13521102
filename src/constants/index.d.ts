@@ -2,11 +2,14 @@
 /**
  * id: message unique id
  * text: user sent text
+ * response: bot response
  * sentTime: user sent time
+ * historyId: message related history
  */
 export interface Message {
   id: number;
   text: string;
+  response: string;
   sentTime: string;
   historyId: number;
 }
