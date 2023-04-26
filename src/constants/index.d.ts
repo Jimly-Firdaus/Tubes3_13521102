@@ -12,6 +12,7 @@ export interface Message {
   response: string;
   responseStatusCode: number;
   sentTime: string;
+  historyId: number;
 }
 
 /**
@@ -54,4 +55,16 @@ export interface userData {
 
 export interface UserMessageHistory extends MessageHistory {
   userId: number;
+}
+
+export interface MessageInterface extends Message {
+  getId(): number;
+  getStatus(): boolean;
+  getText(): string;
+  getResponseMsg(): string;
+  getResponseCode(): number;
+  getSentTime(): string;
+  getResponseStatus(): boolean;
+  setResponseStatus(status: boolean): void;
+  setResponse(text: string, statusCode: number): void;
 }
