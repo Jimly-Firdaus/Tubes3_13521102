@@ -1,4 +1,5 @@
-import { MessageHistory, History, Message } from "src/constants/index"
+import { reactive } from "vue";
+import { MessageHistory, History, Message } from "src/constants/index";
 import { Message as MessageConstructor } from "./message";
 
 export const chatTopic: string[] = [
@@ -34,7 +35,8 @@ for (let i = 0; i < 14; i++) {
     `This message is from message1 array ${i + 1}`,
     new Date().toLocaleTimeString(),
     1
-  )
+  );
+  message.setResponseStatus(true);
   message.setResponse(`Response for message1 array ${i + 1}`, 200);
   message1.push(message);
 }
@@ -46,24 +48,24 @@ for (let i = 0; i < 14; i++) {
     `This message is from message2 array ${i + 1}`,
     new Date().toLocaleTimeString(),
     2
-  )
+  );
+  message.setResponseStatus(true);
   message.setResponse(`Response for message2 array ${i + 1}`, 200);
   message2.push(message);
 }
 
 export const history1: History = {
   historyId: 1,
-  topic: "Message - 1 Array",
-  conversation: message1
-}
+  topic: "Message - 1 Array Long Long",
+  conversation: message1,
+};
 
 export const history2: History = {
   historyId: 2,
   topic: "Message - 2 Array",
-  conversation: message2
-}
-
-export const allHistory: MessageHistory = {
-  messageHistory: [history1, history2]
+  conversation: message2,
 };
 
+export const allHistory: MessageHistory = reactive({
+  messageHistory: [history1, history2],
+});
