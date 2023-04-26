@@ -23,7 +23,7 @@ export interface Message {
 export interface History {
   historyId: number;
   topic: string;
-  conversation: Array<Message>;
+  conversation: Array<MessageInterface>;
 }
 
 // Payload from backend
