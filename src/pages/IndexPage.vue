@@ -8,7 +8,7 @@ import {
 } from "src/constants";
 import { ref, Ref, watch, reactive, onMounted, computed } from "vue";
 import { QScrollArea, useQuasar } from "quasar";
-import { dummyResponse, allHistory } from "src/constants/history";
+import { dummyResponse } from "src/constants/history";
 import { useUtility } from "src/composables/useUtility";
 import { useMessages } from "src/composables/useMessages";
 import { botAvatar, userAvatar } from "src/constants/avatar";
@@ -43,9 +43,34 @@ const chatHistories: MessageHistory = reactive({
 const messages: MessageInterface[] = reactive([]);
 
 const fetchHistories = async () => {
+  $q.loading.show({
+    message: 'Fetching important resouces. Hang on...'
+  });
   const response = await api.get("http://localhost:8080/history");
-
-  // Unload response then loop through the array
+  const fetchedMessageHistory: [] = response.data.historyMessage.messageHistory;
+  fetchedMessageHistory.forEach((ele: History, index) => {
+    console.log(ele);
+    const arrayOfConversation: Array<MessageInterface> = [];
+    ele.conversation.forEach((messageJSON, index) => {
+      const message = new Message(
+        messageJSON.id,
+        true,
+        messageJSON.text,
+        messageJSON.sentTime,
+        messageJSON.historyId
+      )
+      message.setResponse(messageJSON.response, 200);
+      message.setResponseStatus(true);
+      arrayOfConversation.push(message);
+    })
+    const history: History = {
+      historyId: ele.historyId,
+      topic: ele.topic,
+      conversation: arrayOfConversation
+    };
+    chatHistories.messageHistory.push(history);
+  })
+  $q.loading.hide();
 };
 
 const userInput: Ref<string> = ref("");
@@ -63,21 +88,21 @@ const { animateMessage, random, generateTimestamp } = useUtility({
 const method = ref("KMP");
 
 const newChat = () => {
-  currentConversationID.value = allHistory.messageHistory.length + 1;
+  currentConversationID.value = chatHistories.messageHistory.length + 1;
   messages.splice(0, messages.length);
 };
 
 const switchConversation = () => {
   // replace the current array to chosen history conversation
   const chosenHistory =
-    allHistory.messageHistory[currentConversationID.value - 1];
+    chatHistories.messageHistory[currentConversationID.value - 1];
   messages.splice(0, messages.length, ...chosenHistory.conversation);
   scrollToBottom();
 };
 
 const sendMessage = async () => {
   if (!isResponding.value) {
-    const { generateMessageId, updateHistory } = useMessages({ allHistory });
+    const { generateMessageId, updateHistory } = useMessages({ chatHistories });
     isResponding.value = true;
     scrollToBottom();
     let userMessage: Message;
@@ -146,7 +171,7 @@ const sendMessage = async () => {
         topic: currentTopic,
         conversation: currentMessages,
       };
-      allHistory.messageHistory.push(newHistory);
+      chatHistories.messageHistory.push(newHistory);
     } else {
       updateHistory(currentConversationID.value, userMessage);
     }
@@ -157,7 +182,10 @@ watch([messages, currentConversationID], () => {
   scrollToBottom();
 });
 
-onMounted(() => scrollToBottom());
+onMounted(() => {
+  scrollToBottom();
+  fetchHistories();
+});
 </script>
 <template>
   <q-page class="tw-h-screen bg-primary">
@@ -187,7 +215,7 @@ onMounted(() => scrollToBottom());
             active-color="white"
           >
             <template
-              v-for="history in allHistory.messageHistory"
+              v-for="history in chatHistories.messageHistory"
               :key="history"
             >
               <q-tab
@@ -263,7 +291,7 @@ onMounted(() => scrollToBottom());
               active-color="white"
             >
               <template
-                v-for="history in allHistory.messageHistory"
+                v-for="history in chatHistories.messageHistory"
                 :key="history"
               >
                 <q-tab
