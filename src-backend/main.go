@@ -2,12 +2,12 @@ package main
 
 import (
 	"TUBES3_13521102/src-backend/database"
-	FeatureCalculator "TUBES3_13521102/src-backend/featureCalculator"
-	FeatureDate "TUBES3_13521102/src-backend/featureDate"
 	"database/sql"
 	"fmt"
 	"log"
+	"net/http"
 
+	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -21,28 +21,86 @@ const (
 )
 
 func main() {
-    date := "25/02/2023"
 
-    dayName := FeatureDate.DateDayName(date)
-    fmt.Println(dayName)
-
-    hasil, err := FeatureCalculator.CalculateExpression("((-8.05) + 3)")
-
-    if (err != nil) {
-      fmt.Println(err)
-    } else {
-      fmt.Println(hasil)
-    }
-
+  r := gin.Default()
+  r.GET("/history", func(c *gin.Context) {
     db, err := sql.Open("mysql", database.ConnectDatabase(username, password, host, port, databasetype))
-    if (err != nil) {
-      fmt.Printf("Error %s while opening database\n", err)
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{
+            "error": err.Error(),
+        })
+        return
     }
-
     pingErr := db.Ping()
     if pingErr != nil {
         log.Fatal(pingErr)
     }
     fmt.Println("Connected!")
     defer db.Close()
+
+    rows, err := db.Query("SELECT * FROM History")
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{
+            "error": err.Error(),
+        })
+        return
+    }
+    defer rows.Close()
+
+    historyList := []map[string]interface{}{}
+    for rows.Next() {
+      var id int
+      var title string
+      err := rows.Scan(&id, &title)
+      if err != nil {
+          c.JSON(http.StatusInternalServerError, gin.H{
+              "error": err.Error(),
+          })
+          return
+      }
+      history := map[string]interface{}{
+        "historyID": id,
+        "historyTitle": title,
+      }
+
+      historyList = append(historyList, history)
+    }
+    if err := rows.Err(); err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{
+            "error": err.Error(),
+        })
+        return
+    }
+
+    c.JSON(http.StatusOK, gin.H{
+        "history": historyList,
+    })
+  })
+  r.Run(); // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 }
+
+  // date := "25/02/2023"
+
+  //   dayName := FeatureDate.DateDayName(date)
+  //   fmt.Println(dayName)
+
+  //   hasil, err := FeatureCalculator.CalculateExpression("((-80.05) / (-1))")
+
+  //   if (err != nil) {
+  //     fmt.Println(err)
+  //   } else {
+  //     fmt.Println(hasil)
+  //   }
+
+  //   db, err := sql.Open("mysql", database.ConnectDatabase(username, password, host, port, databasetype))
+  //   if (err != nil) {
+  //     fmt.Printf("Error %s while opening database\n", err)
+  //   }
+
+  //   pingErr := db.Ping()
+  //   if pingErr != nil {
+  //       log.Fatal(pingErr)
+  //   }
+  //   fmt.Println("Connected!")
+  //   defer db.Close()
+
