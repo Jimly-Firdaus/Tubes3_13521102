@@ -3,9 +3,6 @@ package main
 import (
 	"TUBES3_13521102/src-backend/controller"
 	"TUBES3_13521102/src-backend/database"
-	FeatureCalculator "TUBES3_13521102/src-backend/featureCalculator"
-	FeatureDate "TUBES3_13521102/src-backend/featureDate"
-	"TUBES3_13521102/src-backend/repository"
 	"database/sql"
 	"fmt"
 	"log"
@@ -30,18 +27,34 @@ var (
 
 
 func main() {
-    date := "25/02/2023"
+    // date := "25/02/2023"
 
-    dayName := FeatureDate.DateDayName(date)
-    fmt.Println(dayName)
+    // dayName := FeatureDate.DateDayName(date)
+    // fmt.Println(dayName)
 
-    hasil, err := FeatureCalculator.CalculateExpression("((-8.05) + 3)")
+    // hasil, err := FeatureCalculator.CalculateExpression("((-8.05) + 3)")
 
-    if (err != nil) {
-      fmt.Println(err)
-    } else {
-      fmt.Println(hasil)
-    }
+    // if (err != nil) {
+    //   fmt.Println(err)
+    // } else {
+    //   fmt.Println(hasil)
+    // }
+
+    // tes, err := repository.GetHistoryByHistoryID(db, 1)
+
+    // if err != nil {
+    //   fmt.Println(err.Error())
+    // }
+
+    // fmt.Println(tes.HistoryID)
+    // fmt.Println(tes.Topic)
+
+    // for _, message := range tes.Conversation {
+    //   fmt.Println(message.Id)
+    //   fmt.Println(message.Text)
+    //   fmt.Println(message.SentTime)
+    //   fmt.Println(message.HistoryId)
+    // }
 
     db, err := sql.Open("mysql", database.ConnectDatabase(username, password, host, port, databasetype))
     if (err != nil) {
@@ -56,23 +69,9 @@ func main() {
     fmt.Println("Connected!")
     defer db.Close()
 
-    tes, err := repository.GetHistoryByHistoryID(db, 1)
-
-    if err != nil {
-      fmt.Println(err.Error())
-    }
-
-    fmt.Println(tes.HistoryID)
-    fmt.Println(tes.Topic)
-
-    for _, message := range tes.Conversation {
-      fmt.Println(message.Id)
-      fmt.Println(message.Text)
-      fmt.Println(message.SentTime)
-      fmt.Println(message.HistoryId)
-    }
-
     r := gin.Default()
 
-    r.GET("/history/:historyID", controller.GetHistoryByHistoryID)
+    r.GET("/history", controller.GetAllHistoryMessage)
+
+    r.Run()
 }
