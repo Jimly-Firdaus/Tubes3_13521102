@@ -5,40 +5,21 @@ import (
 	"database/sql"
 )
 
-func GetAllHistory(db *sql.DB) (results []structs.History, err error) {
-  // Getting data from MySQL
-  query := "SELECT * FROM History"
-
-  rows, err := db.Query(query)
-
-  if err != nil {
-    panic(err)
-  }
-
-  defer rows.Close()
-
-  for rows.Next() {
-    // Set History structs to be add to results
-    var history = structs.History{}
-    err = rows.Scan(&history.HistoryID, &history.HistoryTitle)
-    if err != nil {
-      panic(err)
-    }
-
-    results = append(results, history)
-  }
-
-  return
-}
-
 func InsertHistory(db *sql.DB, history structs.History) (error) {
-  errs := db.QueryRow("INSERT INTO History (historyTitle) VALUES ($1)", history.HistoryTitle)
+  errs := db.QueryRow("INSERT INTO History VALUES ($1, $2)", history.HistoryID, history.HistoryTitle)
 
   return errs.Err()
 }
 
 
 func DeleteHistory(db *sql.DB, history structs.History) (error) {
+  // Deleting from foreign key table first
+  _, errs := db.Exec("DELETE FROM HistoryMessage WHERE historyID = $1", history.HistoryID)
+
+  if errs != nil {
+    panic(errs)
+  }
+
   res, errs := db.Exec("DELETE FROM History WHERE historyID = $1", history.HistoryID)
   n, _ := res.RowsAffected()
 
@@ -68,8 +49,8 @@ func UpdateHistory(db *sql.DB, history structs.History) (error) {
   return nil
 }
 
-func GetHistoryByHistoryID(db *sql.DB, historyID int64) (results []structs.History, err error) {
-  rows, err := db.Query("SELECT * FROM History WHERE historyID = $1", historyID)
+func GetHistoryByHistoryID(db *sql.DB, historyID int64) (results structs.History, err error) {
+  rows, err := db.Query("SELECT * FROM History WHERE historyID = ?", historyID)
 
   if err != nil {
     panic(err)
@@ -78,15 +59,37 @@ func GetHistoryByHistoryID(db *sql.DB, historyID int64) (results []structs.Histo
   defer rows.Close()
 
   for rows.Next() {
-    var history = structs.History{}
 
-    err = rows.Scan(&history.HistoryID, &history.HistoryTitle)
+    err = rows.Scan(&results.HistoryID, &results.HistoryTitle)
 
     if err != nil {
       panic(err)
     }
 
-    results = append(results, history)
+    // Get all messages for current history
+    var questionId int64
+
+    messageRows, errs := db.Query("SELECT userQuestionID FROM HistoryMessage WHERE historyID = ?", results.HistoryID)
+
+    if errs != nil {
+      panic(errs)
+    }
+
+    for messageRows.Next() {
+      errs = messageRows.Scan(&questionId)
+
+      if errs != nil {
+        panic(errs)
+      }
+
+      message, err := GetUserMessageByID(db, questionId)
+
+      if err != nil {
+        panic(err)
+      }
+
+      results.Conversation = append(results.Conversation, message...)
+    }
   }
 
   return
