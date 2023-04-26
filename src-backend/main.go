@@ -70,18 +70,13 @@ func main() {
     defer db.Close()
 
     r := gin.Default()
-    
-    // CORS middleware
-    r.Use(func(c *gin.Context) {
-      c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
-      c.Next()
-    })
 
     // CORS middleware
     r.Use(func(c *gin.Context) {
       c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
       c.Next()
     })
+
 
     r.GET("/history", controller.GetAllHistoryMessage)
 
