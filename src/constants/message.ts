@@ -54,5 +54,3 @@ export class Message {
     this.responseStatusCode = statusCode;
   }
 }
-
-// TODO sent request to backend struct
