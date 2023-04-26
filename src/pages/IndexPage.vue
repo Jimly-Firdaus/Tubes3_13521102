@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { Message } from "src/constants/message";
+import { MessageInterface, History } from "src/constants";
 import { ref, Ref, watch, reactive, onMounted, computed } from "vue";
 import { QScrollArea, useQuasar } from "quasar";
 import { dummyResponse, allHistory } from "src/constants/history";
 import { useUtility } from "src/composables/useUtility";
+import { useMessages } from "src/composables/useMessages";
 import { botAvatar, userAvatar } from "src/constants/avatar";
 
 const $q = useQuasar();
@@ -27,9 +29,8 @@ const scrollToBottom = () => {
 // This must be updated to the newest one (history length + 1)
 const currentConversationID = ref(0);
 
-
 // Perform fetching data to fill this array
-const messages: Message[] = reactive([]);
+const messages: MessageInterface[] = reactive([]);
 const userInput: Ref<string> = ref("");
 const botResponse: Ref<string> = ref("");
 const botFullResponse: Ref<string> = ref("");
@@ -44,20 +45,39 @@ const { animateMessage, random } = useUtility({
 
 const method = ref("");
 
+const newChat = () => {
+  currentConversationID.value = allHistory.messageHistory.length + 1;
+  messages.splice(0, messages.length);
+};
+
 const sendMessage = () => {
   if (!isResponding.value) {
+    const { generateMessageId } = useMessages({ allHistory });
     isResponding.value = true;
     scrollToBottom();
-    const userMessage = new Message(
-      messages.length + 1,
-      true,
-      userInput.value,
-      new Date().toLocaleTimeString(),
-      currentConversationID.value
-    );
+    let userMessage: Message;
+    if (messages.length === 0) {
+      const availId = generateMessageId();
+      userMessage = new Message(
+        messages.length + 1,
+        true,
+        userInput.value,
+        new Date().toLocaleTimeString(),
+        availId
+      );
+    } else {
+      userMessage = new Message(
+        messages.length + 1,
+        true,
+        userInput.value,
+        new Date().toLocaleTimeString(),
+        currentConversationID.value
+      );
+    }
 
     // Send request to backend
     messages.push(userMessage);
+    const currentTopic = userInput.value;
     userInput.value = "";
     setTimeout(async () => {
       // Fetch response from backend
@@ -72,6 +92,15 @@ const sendMessage = () => {
       botResponse.value = "";
       isResponding.value = false;
     }, 1500);
+    if (messages.length === 1) {
+      const currentMessages = messages.slice();
+      const newHistory: History = {
+        historyId: generateMessageId(),
+        topic: currentTopic,
+        conversation: currentMessages,
+      };
+      allHistory.messageHistory.push(newHistory);
+    }
   }
 };
 
@@ -80,6 +109,13 @@ watch(messages, () => {
 });
 
 onMounted(() => scrollToBottom());
+
+const switchConversation = () => {
+  // replace the current array to chosen history conversation
+  const chosenHistory =
+    allHistory.messageHistory[currentConversationID.value - 1];
+  messages.splice(0, messages.length, ...chosenHistory.conversation);
+};
 </script>
 <template>
   <q-page class="tw-h-screen">
@@ -91,14 +127,39 @@ onMounted(() => scrollToBottom());
         >
           <div class="text-h4 q-mb-md">Chat History</div>
           <q-scroll-area style="height: 70%" class="tw-pr-2">
-            <div
-              v-for="n in 20"
-              :key="n"
-              class="q-my-md tw-py-4 text-body"
-              style="border-bottom: 2px solid #000000"
+            <q-btn
+              label="New Chat"
+              icon="add_circle"
+              class="tw-w-full tw-h-12"
+              @click="newChat"
+              :disable="isResponding"
+            />
+
+            <q-tabs
+              v-model="currentConversationID"
+              vertical
+              class="tw-py-4 text-body"
+              active-bg-color="primary"
+              active-color="white"
             >
-              Chat topic - {{ n }}
-            </div>
+              <template
+                v-for="history in allHistory.messageHistory"
+                :key="history"
+              >
+                <q-tab
+                  :name="history.historyId"
+                  @click="switchConversation"
+                  style="border-bottom: 2px solid #000000"
+                  content-class="tw-w-full"
+                  :disable="isResponding"
+                >
+                  <div class="tw-flex tw-items-center">
+                    <q-icon name="chat" class="tw-pr-2" />
+                    <span>{{ history.topic }}</span>
+                  </div>
+                </q-tab>
+              </template>
+            </q-tabs>
           </q-scroll-area>
           <div class="tw-mt-10">
             <h3>Algorithm:</h3>
@@ -208,6 +269,12 @@ onMounted(() => scrollToBottom());
     position: relative;
   }
 }
+
+:deep(.q-btn__content) {
+  font-size: 16px;
+  text-transform: none !important;
+}
+
 :deep(.q-field__control-container) {
   padding-inline: 10px;
 }
@@ -217,7 +284,9 @@ onMounted(() => scrollToBottom());
 :deep(.q-field__native) {
   font-size: 20px;
 }
-
+:deep(.q-tab__indicator) {
+  display: none !important;
+}
 .q-message {
   animation: scale-in 0.5s;
 }
