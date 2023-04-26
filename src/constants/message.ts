@@ -50,6 +50,10 @@ export class Message implements MessageInterface {
     return this.responded;
   }
 
+  public getHistoryId(): number {
+    return this.historyId;
+  }
+
   public setResponseStatus(status: boolean) {
     this.responded = status;
   }
