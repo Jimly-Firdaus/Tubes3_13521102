@@ -1,6 +1,7 @@
 package structs
 
 type History struct {
-  HistoryID    int64    `json:"history_id"`
-  HistoryTitle string   `json:"history_title"`
+  HistoryID    int64          `json:"history_id"`
+  HistoryTitle string         `json:"history_title"`
+  Conversation []Message      `json:"conversation"`
 }
