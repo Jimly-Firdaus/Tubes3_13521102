@@ -24,6 +24,11 @@ const (
 func main() {
 
   r := gin.Default()
+  // CORS middleware
+	r.Use(func(c *gin.Context) {
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+		c.Next()
+	})
   r.GET("/history", func(c *gin.Context) {
     db, err := sql.Open("mysql", database.ConnectDatabase(username, password, host, port, databasetype))
     if err != nil {
