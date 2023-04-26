@@ -3,10 +3,19 @@ package repository
 import (
 	"TUBES3_13521102/src-backend/structs"
 	"database/sql"
+	"time"
 )
 
 func InsertHistory(db *sql.DB, history structs.History, datetime string) (error) {
-  errs := db.QueryRow("INSERT INTO History VALUES (?, ?)", history.HistoryID, history.Topic)
+
+  layoutFormat := "2006-01-02 15:04:05"
+  date, err := time.Parse(layoutFormat, datetime)
+
+  if err != nil {
+    panic(err)
+  }
+
+  errs := db.QueryRow("INSERT INTO History VALUES (?, ?, ?)", history.HistoryID, history.Topic, date)
 
   return errs.Err()
 }
@@ -50,7 +59,7 @@ func UpdateHistory(db *sql.DB, history structs.History) (error) {
 }
 
 func GetHistoryByHistoryID(db *sql.DB, historyID int64) (results structs.History, err error) {
-  rows, err := db.Query("SELECT * FROM History WHERE historyID = ?", historyID)
+  rows, err := db.Query("SELECT historyID, historyTitle FROM History WHERE historyID = ?", historyID)
 
   if err != nil {
     panic(err)
@@ -59,6 +68,9 @@ func GetHistoryByHistoryID(db *sql.DB, historyID int64) (results structs.History
   defer rows.Close()
 
   for rows.Next() {
+    // type DateType time.Time
+
+    // var date DateType
 
     err = rows.Scan(&results.HistoryID, &results.Topic)
 
