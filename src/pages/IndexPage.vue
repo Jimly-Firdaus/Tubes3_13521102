@@ -2,7 +2,7 @@
 import { Message } from "src/constants/message";
 import { ref, Ref, watch, reactive, onMounted, computed } from "vue";
 import { QScrollArea, useQuasar } from "quasar";
-import { dummyResponse } from "src/constants/history";
+import { dummyResponse, allHistory } from "src/constants/history";
 import { useUtility } from "src/composables/useUtility";
 import { botAvatar, userAvatar } from "src/constants/avatar";
 
@@ -24,6 +24,9 @@ const scrollToBottom = () => {
   }
 };
 // TODO: chat history
+// This must be updated to the newest one (history length + 1)
+const currentConversationID = ref(0);
+
 
 // Perform fetching data to fill this array
 const messages: Message[] = reactive([]);
@@ -49,7 +52,8 @@ const sendMessage = () => {
       messages.length + 1,
       true,
       userInput.value,
-      new Date().toLocaleTimeString()
+      new Date().toLocaleTimeString(),
+      currentConversationID.value
     );
 
     // Send request to backend
