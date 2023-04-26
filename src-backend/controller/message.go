@@ -9,7 +9,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 )
-func getAllUserMessageHandler(r *gin.Engine){
+func GetAllUserMessageHandler(r *gin.Engine){
   r.GET("/userMessage", func(c *gin.Context) {
     db, err := sql.Open("mysql", "root:PNGO6atNekbjjq4g2yPy@tcp(containers-us-west-13.railway.app:6330)/railway")
     if err != nil {
@@ -25,11 +25,11 @@ func getAllUserMessageHandler(r *gin.Engine){
 
     defer db.Close()
 
-    userMessageList, err := repository.GetAllUserMessage(db)
-    c.JSON(http.StatusOK, gin.H{
-        "userMessage": userMessageList,
-    })
-  })
+  //   userMessageList, err := repository.GetAllUserMessage(db)
+  //   c.JSON(http.StatusOK, gin.H{
+  //       "userMessage": userMessageList,
+  //   })
+  // })
 }
 
 func getUserMessageByIDHandle(r *gin.Engine){
