@@ -22,7 +22,8 @@ export const useUtility = ({
     let i = 0;
     if (botMessage) {
       while (i <= botFullMessage.length) {
-        botMessage.value += botFullMessage.charAt(i) + botFullMessage.charAt(i + 1);
+        botMessage.value +=
+          botFullMessage.charAt(i) + botFullMessage.charAt(i + 1);
         i = i + 2;
         await wait();
       }
@@ -39,8 +40,27 @@ export const useUtility = ({
     }
     return -1;
   };
+
+  /**
+   * Generate timestamp for current time
+   * @returns formatted date (YYYY-MM-DD HH:MM:SS)
+   * */
+  const generateTimestamp = (): string => {
+    const date = new Date();
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    const hours = date.getHours();
+    const minutes = date.getMinutes();
+    const seconds = date.getSeconds();
+
+    const formattedDate = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+    return formattedDate;
+  };
+
   return {
     animateMessage,
     random,
+    generateTimestamp,
   };
 };
