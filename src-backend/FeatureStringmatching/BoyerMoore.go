@@ -1,8 +1,6 @@
-package main
+package FeatureStringmatching
 
-import "fmt"
-
-func buildLast(pattern string) [128]int {
+func BuildLast(pattern string) [128]int {
 	var last [128]int
 	for i := range last {
 		last[i] = -1
@@ -13,8 +11,8 @@ func buildLast(pattern string) [128]int {
 	return last
 }
 
-func bmMatch(text, pattern string) int {
-	last := buildLast(pattern)
+func BmMatch(text, pattern string) int {
+	last := BuildLast(pattern)
 	n, m := len(text), len(pattern)
 	i := m - 1
 	if i > n-1 {
@@ -31,30 +29,30 @@ func bmMatch(text, pattern string) int {
 			}
 		} else { // Option 2
 			lo := last[text[i]]
-			i += m - min(j, 1+lo)
+			i += m - Min(j, 1+lo)
 			j = m - 1
 		}
 	}
 	return -1
 }
 
-func min(a, b int) int {
+func Min(a, b int) int {
 	if a < b {
 		return a
 	}
 	return b
 }
 // tester
-func main() {
-	var text, pattern string
-	text = "Apa Ibukota Indonesia?"
-	pattern = "Ibukota Indo"
-	fmt.Println("Text:", text)
-	fmt.Println("Pattern:", pattern)
-	posn := bmMatch(text, pattern)
-	if posn == -1 {
-		fmt.Println("Pattern not found")
-	} else {
-		fmt.Println("Pattern starts at posn", posn)
-	}
-}
+// func main() {
+// 	var text, pattern string
+// 	text = "Apa Ibukota Indonesia?"
+// 	pattern = "Ibukota Indo"
+// 	fmt.Println("Text:", text)
+// 	fmt.Println("Pattern:", pattern)
+// 	posn := BmMatch(text, pattern)
+// 	if posn == -1 {
+// 		fmt.Println("Pattern not found")
+// 	} else {
+// 		fmt.Println("Pattern starts at posn", posn)
+// 	}
+// }
