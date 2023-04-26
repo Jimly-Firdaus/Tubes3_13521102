@@ -30,14 +30,14 @@ func GetAllBotResponse(db *sql.DB) (results []structs.BotResponse, err error) {
 }
 
 func InsertBotResponse(db *sql.DB, newResponse structs.BotResponse) (error) {
-  err := db.QueryRow("INSERT INTO BotResponse(question, answer) VALUES($1, $2)", newResponse.Question, newResponse.Answer)
+  err := db.QueryRow("INSERT INTO BotResponse(question, answer) VALUES(?, ?)", newResponse.Question, newResponse.Answer)
 
   return err.Err()
 }
 
 // Deleting BotResponse based on its question
 func DeleteBotResponse(db *sql.DB, botResponse structs.BotResponse) (error) {
-  res, errs := db.Exec("DELETE FROM BotResponse WHERE question = $1", botResponse.Question)
+  res, errs := db.Exec("DELETE FROM BotResponse WHERE question = ?", botResponse.Question)
   n, _ := res.RowsAffected()
 
   if errs != nil {
@@ -52,7 +52,7 @@ func DeleteBotResponse(db *sql.DB, botResponse structs.BotResponse) (error) {
 
 // Updating BotResponse based on its question
 func UpdateBotResponse(db *sql.DB, botResponse structs.BotResponse) (error) {
-  res, errs := db.Exec("UPDATE BotResponse SET answer = $1 WHERE question = $2", botResponse.Answer, botResponse.Question)
+  res, errs := db.Exec("UPDATE BotResponse SET answer = ? WHERE question = ?", botResponse.Answer, botResponse.Question)
   n, _ := res.RowsAffected()
 
   if errs != nil {
@@ -66,7 +66,7 @@ func UpdateBotResponse(db *sql.DB, botResponse structs.BotResponse) (error) {
 }
 
 func GetBotResponseByResponseID(db *sql.DB, responseID int64) (results []structs.BotResponse, err error) {
-  rows, err := db.Query("SELECT * FROM BotResponse WHERE responseID = $1", responseID)
+  rows, err := db.Query("SELECT * FROM BotResponse WHERE responseID = ?", responseID)
 
   if err != nil {
     panic(err)

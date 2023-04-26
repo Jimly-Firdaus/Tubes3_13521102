@@ -59,7 +59,6 @@ func main() {
     for _, message := range tes.Conversation {
       fmt.Println(message.Id)
       fmt.Println(message.Text)
-      fmt.Println(message.Response)
       fmt.Println(message.SentTime)
       fmt.Println(message.HistoryId)
     }

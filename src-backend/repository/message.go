@@ -5,8 +5,8 @@ import (
 	"database/sql"
 )
 
-func InsertUserMessage(db *sql.DB, newMessage structs.Message) (error) {
-  err := db.QueryRow("INSERT INTO UserMessage(userQuestion, botAnswer, sentTime) VALUES(?, ?, ?)", newMessage.Text, newMessage.Response, newMessage.SentTime)
+func InsertUserMessage(db *sql.DB, newMessage structs.Message, response string) (error) {
+  err := db.QueryRow("INSERT INTO UserMessage(userQuestion, botAnswer, sentTime) VALUES(?, ?, ?)", newMessage.Text, response, newMessage.SentTime)
 
   if err != nil {
     return err.Err()
@@ -20,7 +20,7 @@ func InsertUserMessage(db *sql.DB, newMessage structs.Message) (error) {
 
 
 func GetUserMessageByID(db *sql.DB, userQuestionID int64) (results []structs.Message, err error) {
-  rows, err := db.Query("SELECT * FROM UserMessage WHERE userQuestionID = ?", userQuestionID)
+  rows, err := db.Query("SELECT userQuestionID, userQuestion, sentTime FROM UserMessage WHERE userQuestionID = ?", userQuestionID)
 
   if err != nil {
     panic(err)
@@ -32,7 +32,7 @@ func GetUserMessageByID(db *sql.DB, userQuestionID int64) (results []structs.Mes
     // Set UserMessage structs to be added to results
     var userMessage = structs.Message{}
 
-    err := rows.Scan(&userMessage.Id, &userMessage.Text, &userMessage.Response, &userMessage.SentTime)
+    err := rows.Scan(&userMessage.Id, &userMessage.Text, &userMessage.SentTime)
 
     if err != nil {
       panic(err)
