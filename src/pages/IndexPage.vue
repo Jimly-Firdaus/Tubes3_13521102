@@ -49,7 +49,7 @@ const fetchHistories = async () => {
   const response = await api.get("http://localhost:8080/history");
   const fetchedMessageHistory: [] = response.data.historyMessage.messageHistory;
   fetchedMessageHistory.forEach((ele: History, index) => {
-    console.log(ele);
+    // console.log(ele);
     const arrayOfConversation: Array<MessageInterface> = [];
     ele.conversation.forEach((messageJSON, index) => {
       const message = new Message(
@@ -102,6 +102,7 @@ const switchConversation = () => {
 
 const sendMessage = async () => {
   if (!isResponding.value) {
+    const filteredStr = userInput.value.replace(/\n/g, "");
     const { generateMessageId, updateHistory } = useMessages({ chatHistories });
     isResponding.value = true;
     scrollToBottom();
@@ -111,7 +112,7 @@ const sendMessage = async () => {
       userMessage = new Message(
         messages.length + 1,
         true,
-        userInput.value,
+        filteredStr,
         new Date().toLocaleTimeString(),
         availId
       );
@@ -120,33 +121,32 @@ const sendMessage = async () => {
       userMessage = new Message(
         messages.length + 1,
         true,
-        userInput.value,
+        filteredStr,
         new Date().toLocaleTimeString(),
         currentConversationID.value
       );
     }
 
     messages.push(userMessage);
-    const currentTopic = userInput.value;
+    const currentTopic = filteredStr;
 
     // Send request to backend
     const request: Request = {
-      messageData: {
-        id: userMessage.getId(),
-        text: userMessage.getText(),
-        response: "",
-        sentTime: userMessage.getSentTime(),
-        historyId: userMessage.getHistoryId(),
-        historyTimestamp: userMessage.getHistoryTimestamp(),
-      },
+
+      id: userMessage.getId(),
+      text: userMessage.getText(),
+      response: "",
+      sentTime: userMessage.getSentTime(),
+      historyId: userMessage.getHistoryId(),
+      historyTimestamp: userMessage.getHistoryTimestamp(),
+
 
       method: method.value as "KMP" | "BoyerMoore",
     };
-    console.log(request);
-
+    // console.log(request);
     // Unload response from api
-    // const response = await api.get("http://localhost:8080/history");
-    // console.log(response.data.history[0].historyID);
+    const response = await api.post("http://localhost:8080/getmessage", request);
+    console.log(response.data);
 
     // Clear input
     userInput.value = "";
