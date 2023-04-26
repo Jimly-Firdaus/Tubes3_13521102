@@ -1,3 +1,6 @@
+import { MessageHistory, History, Message } from "src/constants/index"
+import { Message as MessageConstructor } from "./message";
+
 export const chatTopic: string[] = [
   "Topic - 1",
   "Topic - 2",
@@ -20,3 +23,47 @@ export const dummyResponse: string[] = [
   "Massa enim nec dui nunc mattis enim ut tellus elementum. Donec ultrices tincidunt arcu non sodales neque sodales ut.",
   "Eget nunc scelerisque viverra mauris in aliquam sem fringilla. Tellus elementum sagittis vitae et leo duis ut diam.",
 ];
+
+export const message1: MessageConstructor[] = [];
+export const message2: MessageConstructor[] = [];
+
+for (let i = 0; i < 14; i++) {
+  const message = new MessageConstructor(
+    i,
+    true,
+    `This message is from message1 array ${i + 1}`,
+    new Date().toLocaleTimeString(),
+    1
+  )
+  message.setResponse(`Response for message1 array ${i + 1}`, 200);
+  message1.push(message);
+}
+
+for (let i = 0; i < 14; i++) {
+  const message = new MessageConstructor(
+    i,
+    true,
+    `This message is from message2 array ${i + 1}`,
+    new Date().toLocaleTimeString(),
+    2
+  )
+  message.setResponse(`Response for message2 array ${i + 1}`, 200);
+  message2.push(message);
+}
+
+export const history1: History = {
+  historyId: 1,
+  topic: "Message - 1 Array",
+  conversation: message1
+}
+
+export const history2: History = {
+  historyId: 2,
+  topic: "Message - 2 Array",
+  conversation: message2
+}
+
+export const allHistory: MessageHistory = {
+  messageHistory: [history1, history2]
+};
+

@@ -8,6 +8,7 @@ export class Message implements MessageInterface {
   responseStatusCode: number;
   sentTime: string;
   responded: boolean;
+  // This history id must be determined by fetching backend total history
   historyId: number;
 
   constructor(id: number, sent: boolean, text: string, sentTime: string, historyId: number) {
