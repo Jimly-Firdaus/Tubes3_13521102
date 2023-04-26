@@ -4,6 +4,7 @@ import (
 	"TUBES3_13521102/src-backend/database"
 	FeatureCalculator "TUBES3_13521102/src-backend/featureCalculator"
 	FeatureDate "TUBES3_13521102/src-backend/featureDate"
+	"TUBES3_13521102/src-backend/repository"
 	"database/sql"
 	"fmt"
 	"log"
@@ -45,4 +46,21 @@ func main() {
     }
     fmt.Println("Connected!")
     defer db.Close()
+
+    tes, err := repository.GetHistoryByHistoryID(db, 1)
+
+    if err != nil {
+      fmt.Println(err.Error())
+    }
+
+    fmt.Println(tes.HistoryID)
+    fmt.Println(tes.Topic)
+
+    for _, message := range tes.Conversation {
+      fmt.Println(message.Id)
+      fmt.Println(message.Text)
+      fmt.Println(message.Response)
+      fmt.Println(message.SentTime)
+      fmt.Println(message.HistoryId)
+    }
 }

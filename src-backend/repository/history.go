@@ -6,7 +6,7 @@ import (
 )
 
 func InsertHistory(db *sql.DB, history structs.History) (error) {
-  errs := db.QueryRow("INSERT INTO History VALUES ($1, $2)", history.HistoryID, history.HistoryTitle)
+  errs := db.QueryRow("INSERT INTO History VALUES (?, ?)", history.HistoryID, history.Topic)
 
   return errs.Err()
 }
@@ -14,13 +14,13 @@ func InsertHistory(db *sql.DB, history structs.History) (error) {
 
 func DeleteHistory(db *sql.DB, history structs.History) (error) {
   // Deleting from foreign key table first
-  _, errs := db.Exec("DELETE FROM HistoryMessage WHERE historyID = $1", history.HistoryID)
+  _, errs := db.Exec("DELETE FROM HistoryMessage WHERE historyID = ?", history.HistoryID)
 
   if errs != nil {
     panic(errs)
   }
 
-  res, errs := db.Exec("DELETE FROM History WHERE historyID = $1", history.HistoryID)
+  res, errs := db.Exec("DELETE FROM History WHERE historyID = ?", history.HistoryID)
   n, _ := res.RowsAffected()
 
   if errs != nil {
@@ -35,7 +35,7 @@ func DeleteHistory(db *sql.DB, history structs.History) (error) {
 }
 
 func UpdateHistory(db *sql.DB, history structs.History) (error) {
-  res, errs := db.Exec("UPDATE History SET historyTitle = $1 WHERE historyID = $2", history.HistoryTitle, history.HistoryID)
+  res, errs := db.Exec("UPDATE History SET historyTitle = ? WHERE historyID = ?", history.Topic, history.HistoryID)
   n, _ := res.RowsAffected()
 
   if errs != nil {
@@ -60,7 +60,7 @@ func GetHistoryByHistoryID(db *sql.DB, historyID int64) (results structs.History
 
   for rows.Next() {
 
-    err = rows.Scan(&results.HistoryID, &results.HistoryTitle)
+    err = rows.Scan(&results.HistoryID, &results.Topic)
 
     if err != nil {
       panic(err)
