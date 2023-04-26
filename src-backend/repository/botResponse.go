@@ -1,7 +1,7 @@
 package repository
 
 import (
-  "TUBES3_13521102/src-backend/structs"
+	"TUBES3_13521102/src-backend/structs"
 	"database/sql"
 )
 
