@@ -41,9 +41,13 @@ export interface MessageHistory {
  * requestModify: optional, true if user wants to add/remove/change db content, otherwise false
  */
 export interface Request {
-  messageData: Message;
+  id: number;
+  text: string;
+  response: string;
+  sentTime: string;
+  historyId: number;
+  historyTimestamp: string;
   method: 'KMP' | 'BoyerMoore';
-  requestModify?: boolean;
 }
 
 // Future use --ignore this

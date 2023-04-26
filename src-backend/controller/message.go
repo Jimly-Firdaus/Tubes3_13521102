@@ -88,7 +88,13 @@ func ParseUserMessage(c* gin.Context) {
 	}
 
   // Use the message and method fields in the Request struct
-  fmt.Println(req.Message)
+  // fmt.Println(req.Message)
+  fmt.Println(req.Id)
+  fmt.Println(req.Text)
+  fmt.Println(req.Response)
+  fmt.Println(req.SentTime)
+  fmt.Println(req.HistoryId)
+  fmt.Println(req.HistoryTimeStamp)
   fmt.Println(req.Method)
 
   // Write a response back to the client
