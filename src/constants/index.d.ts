@@ -2,15 +2,11 @@
 /**
  * id: message unique id
  * text: user sent text
- * reponse: bot response
- * responseStatusCode for network checking
  * sentTime: user sent time
  */
 export interface Message {
   id: number;
   text: string;
-  response: string;
-  responseStatusCode: number;
   sentTime: string;
   historyId: number;
 }
@@ -41,8 +37,8 @@ export interface MessageHistory {
  * requestModify: optional, true if user wants to add/remove/change db content, otherwise false
  */
 export interface Request {
-  message: Message;
-  method: "KMP" | "BoyerMoore";
+  messageData: Message;
+  method: 'KMP' | 'BoyerMoore';
   requestModify?: boolean;
 }
 
@@ -58,6 +54,9 @@ export interface UserMessageHistory extends MessageHistory {
 }
 
 export interface MessageInterface extends Message {
+  response: string;
+  responseStatusCode: number;
+
   getId(): number;
   getStatus(): boolean;
   getText(): string;
