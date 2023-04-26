@@ -7,6 +7,7 @@ import { dummyResponse, allHistory } from "src/constants/history";
 import { useUtility } from "src/composables/useUtility";
 import { useMessages } from "src/composables/useMessages";
 import { botAvatar, userAvatar } from "src/constants/avatar";
+import { api } from "src/boot/axios";
 
 const $q = useQuasar();
 const BREAKPOINT = 800;
@@ -25,7 +26,7 @@ const scrollToBottom = () => {
     );
   }
 };
-// TODO: chat history
+
 // This must be updated to the newest one (history length + 1)
 const currentConversationID = ref(0);
 
@@ -43,16 +44,16 @@ const { animateMessage, random } = useUtility({
   duration: 20,
 });
 
-const method = ref("");
+const method = ref("KMP");
 
 const newChat = () => {
   currentConversationID.value = allHistory.messageHistory.length + 1;
   messages.splice(0, messages.length);
 };
 
-const sendMessage = () => {
+const sendMessage = async () => {
   if (!isResponding.value) {
-    const { generateMessageId } = useMessages({ allHistory });
+    const { generateMessageId, updateHistory } = useMessages({ allHistory });
     isResponding.value = true;
     scrollToBottom();
     let userMessage: Message;
@@ -100,11 +101,13 @@ const sendMessage = () => {
         conversation: currentMessages,
       };
       allHistory.messageHistory.push(newHistory);
+    } else {
+      updateHistory(currentConversationID.value, userMessage);
     }
   }
 };
 
-watch(messages, () => {
+watch([messages, currentConversationID], () => {
   scrollToBottom();
 });
 
@@ -115,6 +118,7 @@ const switchConversation = () => {
   const chosenHistory =
     allHistory.messageHistory[currentConversationID.value - 1];
   messages.splice(0, messages.length, ...chosenHistory.conversation);
+  scrollToBottom();
 };
 </script>
 <template>
