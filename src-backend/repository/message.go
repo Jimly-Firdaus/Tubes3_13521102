@@ -1,7 +1,7 @@
 package repository
 
 import (
-  "TUBES3_13521102/src-backend/structs"
+	"TUBES3_13521102/src-backend/structs"
 	"database/sql"
 )
 
@@ -44,7 +44,7 @@ func InsertUserMessage(db *sql.DB, newMessage structs.Message) (error) {
 
 
 func GetUserMessageByID(db *sql.DB, userQuestionID int64) (results []structs.Message, err error) {
-  rows, err := db.Query("SELECT userQuestionID, userQuestion, sentTime FROM UserMessage WHERE userQuestionID = ?", userQuestionID)
+  rows, err := db.Query("SELECT * FROM UserMessage WHERE userQuestionID = ?", userQuestionID)
 
   if err != nil {
     panic(err)

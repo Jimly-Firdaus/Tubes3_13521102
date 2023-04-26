@@ -1,8 +1,8 @@
 package repository
 
 import (
-  "database/sql"
-  "TUBES3_13521102/src-backend/structs"
+	"TUBES3_13521102/src-backend/structs"
+	"database/sql"
 )
 
 func GetAllHistoryMessage(db *sql.DB) (results structs.MessageHistory, err error) {
