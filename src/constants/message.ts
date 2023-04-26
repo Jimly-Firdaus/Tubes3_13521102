@@ -1,13 +1,16 @@
-export class Message {
-  private id: number;
-  private sent: boolean;
-  private text: string;
-  private response: string;
-  private responseStatusCode: number;
-  private sentTime: string;
-  private responded: boolean;
+import { MessageInterface } from "src/constants/index";
 
-  constructor(id: number, sent: boolean, text: string, sentTime: string) {
+export class Message implements MessageInterface {
+  id: number;
+  sent: boolean;
+  text: string;
+  response: string;
+  responseStatusCode: number;
+  sentTime: string;
+  responded: boolean;
+  historyId: number;
+
+  constructor(id: number, sent: boolean, text: string, sentTime: string, historyId: number) {
     this.id = id;
     this.sent = sent;
     this.text = text;
@@ -15,6 +18,7 @@ export class Message {
     this.responseStatusCode = 0;
     this.sentTime = sentTime;
     this.responded = false;
+    this.historyId = historyId;
   }
 
   public getId(): number {
