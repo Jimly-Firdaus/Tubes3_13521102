@@ -2,6 +2,11 @@ package main
 
 import (
 	"TUBES3_13521102/src-backend/database"
+<<<<<<< HEAD
+=======
+	FeatureCalculator "TUBES3_13521102/src-backend/featureCalculator"
+	FeatureDate "TUBES3_13521102/src-backend/featureDate"
+>>>>>>> 320028fe4c9951c4eab11fcf6c410eac3afd03dd
 	"TUBES3_13521102/src-backend/repository"
 	"database/sql"
 	"fmt"
@@ -65,6 +70,7 @@ func main() {
     }
     defer db.Close()
 
+<<<<<<< HEAD
     responseList, err := repository.GetAllBotResponse(db)
 
     c.JSON(http.StatusOK, gin.H{
@@ -72,6 +78,23 @@ func main() {
     })
   })
   r.Run(); // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
+=======
+    tes, err := repository.GetHistoryByHistoryID(db, 1)
+
+    if err != nil {
+      fmt.Println(err.Error())
+    }
+
+    fmt.Println(tes.HistoryID)
+    fmt.Println(tes.Topic)
+
+    for _, message := range tes.Conversation {
+      fmt.Println(message.Id)
+      fmt.Println(message.Text)
+      fmt.Println(message.SentTime)
+      fmt.Println(message.HistoryId)
+    }
+>>>>>>> 320028fe4c9951c4eab11fcf6c410eac3afd03dd
 }
 
   // date := "25/02/2023"
