@@ -2,6 +2,7 @@ package main
 
 import (
 	"TUBES3_13521102/src-backend/database"
+	"TUBES3_13521102/src-backend/repository"
 	"database/sql"
 	"fmt"
 	"log"
@@ -43,42 +44,30 @@ func main() {
     fmt.Println("Connected!")
     defer db.Close()
 
-    rows, err := db.Query("SELECT * FROM History")
+    historyList, err := repository.GetAllHistory(db)
+    c.JSON(http.StatusOK, gin.H{
+        "history": historyList,
+    })
+  })
+
+  r.GET("/botresponse", func(c *gin.Context) {
+    db, err := sql.Open("mysql", database.ConnectDatabase(username, password, host, port, databasetype))
     if err != nil {
         c.JSON(http.StatusInternalServerError, gin.H{
             "error": err.Error(),
         })
         return
     }
-    defer rows.Close()
-
-    historyList := []map[string]interface{}{}
-    for rows.Next() {
-      var id int
-      var title string
-      err := rows.Scan(&id, &title)
-      if err != nil {
-          c.JSON(http.StatusInternalServerError, gin.H{
-              "error": err.Error(),
-          })
-          return
-      }
-      history := map[string]interface{}{
-        "historyID": id,
-        "historyTitle": title,
-      }
-
-      historyList = append(historyList, history)
+    pingErr := db.Ping()
+    if pingErr != nil {
+        log.Fatal(pingErr)
     }
-    if err := rows.Err(); err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{
-            "error": err.Error(),
-        })
-        return
-    }
+    defer db.Close()
+
+    responseList, err := repository.GetAllBotResponse(db)
 
     c.JSON(http.StatusOK, gin.H{
-        "history": historyList,
+        "botResponse": responseList,
     })
   })
   r.Run(); // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
