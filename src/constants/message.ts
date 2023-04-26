@@ -10,8 +10,16 @@ export class Message implements MessageInterface {
   responded: boolean;
   // This history id must be determined by fetching backend total history
   historyId: number;
+  // This is filled when this chat marks a new conversation
+  historyTimestamp: string;
 
-  constructor(id: number, sent: boolean, text: string, sentTime: string, historyId: number) {
+  constructor(
+    id: number,
+    sent: boolean,
+    text: string,
+    sentTime: string,
+    historyId: number
+  ) {
     this.id = id;
     this.sent = sent;
     this.text = text;
@@ -20,6 +28,7 @@ export class Message implements MessageInterface {
     this.sentTime = sentTime;
     this.responded = false;
     this.historyId = historyId;
+    this.historyTimestamp = "";
   }
 
   public getId(): number {
@@ -54,8 +63,16 @@ export class Message implements MessageInterface {
     return this.historyId;
   }
 
-  public setResponseStatus(status: boolean) {
+  public setResponseStatus(status: boolean): void {
     this.responded = status;
+  }
+
+  public setHistoryTimestamp(timestamp: string): void {
+    this.historyTimestamp = timestamp;
+  }
+
+  public getHistoryTimestamp(): string {
+    return this.historyTimestamp;
   }
 
   public setResponse(text: string, statusCode: number): void {

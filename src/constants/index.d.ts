@@ -12,6 +12,7 @@ export interface Message {
   response: string;
   sentTime: string;
   historyId: number;
+  historyTimestamp: string;
 }
 
 /**
@@ -67,6 +68,8 @@ export interface MessageInterface extends Message {
   getResponseCode(): number;
   getSentTime(): string;
   getResponseStatus(): boolean;
+  getHistoryTimestamp(): string;
   setResponseStatus(status: boolean): void;
   setResponse(text: string, statusCode: number): void;
+  setHistoryTimestamp(timestamp: string): void;
 }
