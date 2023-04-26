@@ -5,7 +5,7 @@ import (
 	"database/sql"
 )
 
-func InsertHistory(db *sql.DB, history structs.History) (error) {
+func InsertHistory(db *sql.DB, history structs.History, datetime string) (error) {
   errs := db.QueryRow("INSERT INTO History VALUES (?, ?)", history.HistoryID, history.Topic)
 
   return errs.Err()
