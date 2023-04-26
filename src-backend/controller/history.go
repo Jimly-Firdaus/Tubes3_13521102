@@ -9,57 +9,37 @@ import (
 
 	"github.com/gin-gonic/gin"
 )
-func getAllHistoryHandler(r *gin.Engine){
-  r.GET("/history", func(c *gin.Context) {
-    db, err := sql.Open("mysql", "root:PNGO6atNekbjjq4g2yPy@tcp(containers-us-west-13.railway.app:6330)/railway")
-    if err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{
-            "error": err.Error(),
-        })
-        return
-    }
-    pingErr := db.Ping()
-    if pingErr != nil {
-        log.Fatal(pingErr)
-    }
+func GetHistoryByHistoryID(c *gin.Context){
+  // Receive historyID through front end
+  historyID, err := strconv.ParseInt(c.Param("historyID"), 10, 64)
+  if err != nil {
+      c.JSON(http.StatusBadRequest, gin.H{
+          "error": "Invalid history ID",
+      })
+      return
+  }
 
-    defer db.Close()
+  db, err := sql.Open("mysql", "root:PNGO6atNekbjjq4g2yPy@tcp(containers-us-west-13.railway.app:6330)/railway")
+  if err != nil {
+      c.JSON(http.StatusInternalServerError, gin.H{
+          "error": err.Error(),
+      })
+      return
+  }
+  pingErr := db.Ping()
+  if pingErr != nil {
+      log.Fatal(pingErr)
+  }
 
-    historyList, err := repository.GetAllHistory(db)
-    c.JSON(http.StatusOK, gin.H{
-        "history": historyList,
-    })
+  defer db.Close()
+
+  historybyID, err := repository.GetHistoryByHistoryID(db, historyID)
+  // historyByID, err := repository.GetHistoryByHistoryID(database.db, historyID)
+  c.JSON(http.StatusOK, gin.H{
+      "historybyID": historybyID,
   })
 }
 
-func getHistoryByHistoryIDHandler(r *gin.Engine){
-  r.GET("/history/:historyID", func(c *gin.Context) {
-    // Receive historyID through front end
-    historyID, err := strconv.ParseInt(c.Param("historyID"), 10, 64)
-    if err != nil {
-        c.JSON(http.StatusBadRequest, gin.H{
-            "error": "Invalid history ID",
-        })
-        return
-    }
+func InsertHistory(c *gin.Context){
 
-    db, err := sql.Open("mysql", "root:PNGO6atNekbjjq4g2yPy@tcp(containers-us-west-13.railway.app:6330)/railway")
-    if err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{
-            "error": err.Error(),
-        })
-        return
-    }
-    pingErr := db.Ping()
-    if pingErr != nil {
-        log.Fatal(pingErr)
-    }
-
-    defer db.Close()
-
-    historybyID, err := repository.GetHistoryByHistoryID(db, historyID)
-    c.JSON(http.StatusOK, gin.H{
-        "historybyID": historybyID,
-    })
-  })
 }

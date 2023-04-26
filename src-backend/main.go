@@ -1,6 +1,7 @@
 package main
 
 import (
+	"TUBES3_13521102/src-backend/controller"
 	"TUBES3_13521102/src-backend/database"
 	FeatureCalculator "TUBES3_13521102/src-backend/featureCalculator"
 	FeatureDate "TUBES3_13521102/src-backend/featureDate"
@@ -9,6 +10,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -20,6 +22,12 @@ const (
   port = "6330"
   databasetype = "railway"
 )
+
+
+var (
+  db *sql.DB
+)
+
 
 func main() {
     date := "25/02/2023"
@@ -39,6 +47,7 @@ func main() {
     if (err != nil) {
       fmt.Printf("Error %s while opening database\n", err)
     }
+
 
     pingErr := db.Ping()
     if pingErr != nil {
@@ -62,4 +71,8 @@ func main() {
       fmt.Println(message.SentTime)
       fmt.Println(message.HistoryId)
     }
+
+    r := gin.Default()
+
+    r.GET("/history/:historyID", controller.GetHistoryByHistoryID)
 }
