@@ -4,6 +4,7 @@ import (
 	"TUBES3_13521102/src-backend/repository"
 	"TUBES3_13521102/src-backend/structs"
 	"database/sql"
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -77,6 +78,23 @@ func GetUserMessageByID(c *gin.Context){
    c.JSON(http.StatusOK, gin.H{
        "userMessage": userMessage,
    })
+}
+func ParseUserMessage(c* gin.Context) {
+  // Parse the request body into a Request struct
+  var req structs.Request
+  if err := c.BindJSON(&req); err != nil {
+		c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
+  // Use the message and method fields in the Request struct
+  fmt.Println(req.Message)
+  fmt.Println(req.Method)
+
+  // Write a response back to the client
+  // ...
+  resp := gin.H{"message": "Received request successfully"}
+	c.JSON(http.StatusOK, resp)
 }
 // func GetAllUserMessageHandler(r *gin.Engine){
 //   r.GET("/userMessage", func(c *gin.Context) {

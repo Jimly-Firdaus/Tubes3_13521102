@@ -78,3 +78,4 @@ func GetUserMessageByID(db *sql.DB, userQuestionID int64) (results []structs.Mes
 
   return
 }
+

@@ -71,9 +71,17 @@ func main() {
 
     r := gin.Default()
 
+    // CORS middleware
+    r.Use(func(c *gin.Context) {
+      c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+      c.Next()
+    })
+
     r.GET("/history", controller.GetAllHistoryMessage)
 
     r.POST("/message", controller.InsertUserMessage)
+
+    r.POST("/getmessage", controller.ParseUserMessage)
 
     r.Run()
 }
