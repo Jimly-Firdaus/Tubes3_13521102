@@ -73,5 +73,7 @@ func main() {
 
     r.GET("/history", controller.GetAllHistoryMessage)
 
+    r.POST("/message", controller.InsertUserMessage)
+
     r.Run()
 }

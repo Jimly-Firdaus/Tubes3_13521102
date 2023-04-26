@@ -40,6 +40,37 @@ func GetHistoryByHistoryID(c *gin.Context){
   })
 }
 
-func InsertHistory(c *gin.Context){
 
-}
+// func InsertHistory(c *gin.Context){
+//   var (
+//     history structs.History
+//     err error
+//   )
+//   db, err := sql.Open("mysql", "root:PNGO6atNekbjjq4g2yPy@tcp(containers-us-west-13.railway.app:6330)/railway")
+//   if err != nil {
+//       c.JSON(http.StatusInternalServerError, gin.H{
+//           "error": err.Error(),
+//       })
+//       return
+//   }
+//   pingErr := db.Ping()
+//   if pingErr != nil {
+//       log.Fatal(pingErr)
+//   }
+
+//   defer db.Close()
+
+//   err = c.ShouldBindJSON(&history)
+//   if (err != nil){
+//     panic(err)
+//   }
+//   err = repository.InsertHistory(db, history, history.)
+// 	if err != nil {
+// 		panic(err)
+// 	}
+
+// 	c.JSON(http.StatusOK, gin.H{
+// 		"result": "Success Create History",
+// 	})
+
+// }
