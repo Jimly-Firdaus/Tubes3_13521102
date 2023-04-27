@@ -59,6 +59,7 @@ func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResp
       response.Headers["Access-Control-Allow-Origin"] = "*"
 	  fmt.Println("Response headers: %v", response.Headers)
       fmt.Println("Response body: %s", response.Body)
+	  fmt.Println("Hit history")
       return response, nil
     }
 	case http.MethodPost:
@@ -80,6 +81,7 @@ func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResp
 	default:
 		fmt.Println("HTTP method: %s", request.HTTPMethod)
 		fmt.Println("Resource: %s", request.Resource)
+		fmt.Println("Hit default")
 		return &events.APIGatewayProxyResponse{
 			StatusCode: http.StatusMethodNotAllowed,
 			Body:       http.StatusText(http.StatusMethodNotAllowed),
@@ -87,6 +89,7 @@ func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResp
 	}
 	fmt.Println("HTTP method: %s", request.HTTPMethod)
 	fmt.Println("Resource: %s", request.Resource)
+	fmt.Println("Hit outside switch")
     return &events.APIGatewayProxyResponse{
       StatusCode: http.StatusNotImplemented,
       Body:       http.StatusText(http.StatusNotImplemented),
