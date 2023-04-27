@@ -52,7 +52,7 @@ func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResp
 	switch request.HTTPMethod {
 	case http.MethodGet:
 		fmt.Println("Hit history get")
-		if request.Resource == "/.netlify/functions/endpoint/history" {
+		if request.Resource == ".netlify/functions/endpoint/history" {
       response, err := controller.GetAllHistoryMessage(request)
       if err != nil {
         return response, err
