@@ -50,6 +50,7 @@ func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResp
 	defer db.Close()
 
 	switch request.HTTPMethod {
+		fmt.Printf("Request: %+v\n", request)
 	case http.MethodGet:
 		fmt.Println("Hit history get")
 		if request.Resource == ".netlify/functions/endpoint/history" {
