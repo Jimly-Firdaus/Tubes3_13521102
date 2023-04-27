@@ -53,7 +53,7 @@ func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResp
 	case http.MethodGet:
 		fmt.Printf("Request: %+v\n", request)
 		fmt.Println("Hit history get")
-		if request.Resource.Path == "/.netlify/functions/endpoint/history" {
+		if request.Path == "/.netlify/functions/endpoint/history" {
       response, err := controller.GetAllHistoryMessage(request)
       if err != nil {
         return response, err
@@ -65,11 +65,11 @@ func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResp
       return response, nil
     }
 	case http.MethodPost:
-		if request.Resource == "/.netlify/functions/endpoint/getmessage" {
+		if request.Path == "/.netlify/functions/endpoint/getmessage" {
 			return controller.ParseUserMessage(request)
 		}
 	case http.MethodOptions:
-		if request.Resource == "/.netlify/functions/endpoint/getmessage" {
+		if request.Path == "/.netlify/functions/endpoint/getmessage" {
 			headers := map[string]string{
 				"Access-Control-Allow-Origin":  "*",
 				"Access-Control-Allow-Methods": "POST",
