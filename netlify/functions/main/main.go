@@ -47,6 +47,7 @@ func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResp
 		}, nil
 	}
 	fmt.Println("Connected!")
+	defer db.Close()
 
 	switch request.HTTPMethod {
 	case http.MethodGet:
