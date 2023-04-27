@@ -52,13 +52,15 @@ func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResp
 	switch request.HTTPMethod {
 	case http.MethodGet:
 		if request.Resource == "/history" {
-			response, err := controller.GetAllHistoryMessage(request)
-			if err != nil {
-				return response, err
-			}
-			response.Headers["Access-Control-Allow-Origin"] = "*"
-			return response, nil
-		}
+      response, err := controller.GetAllHistoryMessage(request)
+      if err != nil {
+        return response, err
+      }
+      response.Headers["Access-Control-Allow-Origin"] = "*"
+      log.Printf("Response headers: %v", response.Headers)
+      log.Printf("Response body: %s", response.Body)
+      return response, nil
+    }
 	case http.MethodPost:
 		if request.Resource == "/getmessage" {
 			return controller.ParseUserMessage(request)
