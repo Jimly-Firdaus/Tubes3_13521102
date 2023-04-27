@@ -1,0 +1,3 @@
+[build]
+  command = "cd functions && go build -o ../lambda/entrypoint main.go"
+  functions = "lambda"

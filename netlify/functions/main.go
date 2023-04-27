@@ -48,8 +48,7 @@ func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResp
 	}
 	fmt.Println("Connected!")
 	defer db.Close()
-  fmt.Println("HTTP method: %s", request.HTTPMethod)
-  fmt.Println("Resource: %s", request.Resource)
+	
 	switch request.HTTPMethod {
 	case http.MethodGet:
 		if request.Resource == "/history" {
@@ -58,10 +57,6 @@ func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResp
         return response, err
       }
       response.Headers["Access-Control-Allow-Origin"] = "*"
-      // log.Printf("Response headers: %v", response.Headers)
-      fmt.Println("Response headers: %v", response.Headers)
-      fmt.Println("Response body: %s", response.Body)
-      // log.Printf("Response body: %s", response.Body)
       return response, nil
     }
 	case http.MethodPost:
