@@ -5,26 +5,26 @@ import (
 	"database/sql"
 	"log"
 	"net/http"
-
-	"github.com/gin-gonic/gin"
+    "encoding/json"
 )
-func GetAllHistoryMessage(c *gin.Context){
-  db, err := sql.Open("mysql", "root:PNGO6atNekbjjq4g2yPy@tcp(containers-us-west-13.railway.app:6330)/railway")
-  if err != nil {
-      c.JSON(http.StatusInternalServerError, gin.H{
-          "error": err.Error(),
-      })
-      return
-  }
-  pingErr := db.Ping()
-  if pingErr != nil {
-      log.Fatal(pingErr)
-  }
+func GetAllHistoryMessage(w http.ResponseWriter, r *http.Request) {
+    db, err := sql.Open("mysql", "root:PNGO6atNekbjjq4g2yPy@tcp(containers-us-west-13.railway.app:6330)/railway")
+    if err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
+    pingErr := db.Ping()
+    if pingErr != nil {
+        log.Fatal(pingErr)
+    }
 
-  defer db.Close()
+    defer db.Close()
 
-  historyMessageList, err := repository.GetAllHistoryMessage(db)
-  c.JSON(http.StatusOK, gin.H{
-      "historyMessage": historyMessageList,
-  })
+    historyMessageList, err := repository.GetAllHistoryMessage(db)
+
+    // Write response as JSON
+    w.Header().Set("Content-Type", "application/json")
+    json.NewEncoder(w).Encode(map[string]interface{}{
+        "historyMessage": historyMessageList,
+    })
 }

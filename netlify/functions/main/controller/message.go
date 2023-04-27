@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+  "encoding/json"
 
 	"github.com/gin-gonic/gin"
 )
@@ -79,13 +80,13 @@ func GetUserMessageByID(c *gin.Context){
        "userMessage": userMessage,
    })
 }
-func ParseUserMessage(c* gin.Context) {
+func ParseUserMessage(w http.ResponseWriter, r *http.Request) {
   // Parse the request body into a Request struct
   var req structs.Request
-  if err := c.BindJSON(&req); err != nil {
-		c.AbortWithError(http.StatusBadRequest, err)
-		return
-	}
+  if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+      http.Error(w, err.Error(), http.StatusBadRequest)
+      return
+  }
 
   // Use the message and method fields in the Request struct
   // fmt.Println(req.Message)
@@ -99,8 +100,9 @@ func ParseUserMessage(c* gin.Context) {
 
   // Write a response back to the client
   // ...
-  resp := gin.H{"message": "Received request successfully"}
-	c.JSON(http.StatusOK, resp)
+  resp := map[string]interface{}{"message": "Received request successfully"}
+  w.Header().Set("Content-Type", "application/json")
+  json.NewEncoder(w).Encode(resp)
 }
 // func GetAllUserMessageHandler(r *gin.Engine){
 //   r.GET("/userMessage", func(c *gin.Context) {

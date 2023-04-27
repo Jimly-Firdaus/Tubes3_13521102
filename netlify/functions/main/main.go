@@ -8,7 +8,9 @@ import (
 	"log"
   "net/http"
 
-	"github.com/gin-gonic/gin"
+  "github.com/aws/aws-lambda-go/events"
+  "github.com/aws/aws-lambda-go/lambda"
+  "github.com/akrylysov/algnhsa"
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -26,42 +28,67 @@ var (
   db *sql.DB
 )
 
-
-func main() {
-
-    db, err := sql.Open("mysql", database.ConnectDatabase(username, password, host, port, databasetype))
-    if (err != nil) {
-      fmt.Printf("Error %s while opening database\n", err)
+func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResponse, error) {
+    // Create http.ResponseWriter and *http.Request from events.APIGatewayProxyRequest
+    w, r, err := algnhsa.NewResponseWriter(request), algnhsa.NewRequest(request)
+    if err != nil {
+        return &events.APIGatewayProxyResponse{
+            StatusCode: http.StatusInternalServerError,
+            Body:       err.Error(),
+        }, nil
     }
 
+    // Your server-side functionality
+    db, err := sql.Open("mysql", database.ConnectDatabase(username, password, host, port, databasetype))
+    if err != nil {
+        fmt.Printf("Error %s while opening database\n", err)
+        return &events.APIGatewayProxyResponse{
+            StatusCode: http.StatusInternalServerError,
+            Body:       err.Error(),
+        }, nil
+    }
+    defer db.Close()
 
     pingErr := db.Ping()
     if pingErr != nil {
         log.Fatal(pingErr)
+        return &events.APIGatewayProxyResponse{
+            StatusCode: http.StatusInternalServerError,
+            Body:       pingErr.Error(),
+        }, nil
     }
     fmt.Println("Connected!")
     defer db.Close()
 
-    r := gin.Default()
+    switch r.Method {
+    case http.MethodGet:
+        if r.URL.Path == "/history" {
+            // Handle GET /history request
+            controller.GetAllHistoryMessage(w, r)
+        }
+    case http.MethodPost:
+        if r.URL.Path == "/message" {
+            // Handle POST /message request
+            // ...
+        } else if r.URL.Path == "/getmessage" {
+            // Handle POST /getmessage request
+            controller.ParseUserMessage(w, r)
+        }
+    case http.MethodOptions:
+        if r.URL.Path == "/getmessage" {
+            // Handle OPTIONS /getmessage request
+            w.Header().Set("Access-Control-Allow-Origin", "*")
+            w.Header().Set("Access-Control-Allow-Methods", "POST")
+            w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+            w.WriteHeader(http.StatusOK)
+            return algnhsa.ProxyResponse(w), nil
+        }
+    }
 
-    // CORS middleware
-    r.Use(func(c *gin.Context) {
-      c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
-      c.Writer.Header().Set("Access-Control-Allow-Methods", "POST")
-      c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type")
-      c.Next()
-    })
-    r.GET("/history", controller.GetAllHistoryMessage)
+    return algnhsa.ProxyResponse(w), nil
+}
 
-    r.POST("/message", controller.InsertUserMessage)
-
-    r.OPTIONS("/getmessage", func(c *gin.Context) {
-      c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
-      c.Writer.Header().Set("Access-Control-Allow-Methods", "POST")
-      c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type")
-      c.Status(http.StatusOK)
-    })
-    r.POST("/getmessage", controller.ParseUserMessage)
-
-    r.Run()
+func main() {
+  // Make the handler available for Remote Procedure Call
+  lambda.Start(handler)
 }
