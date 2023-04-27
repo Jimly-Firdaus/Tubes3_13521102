@@ -1,0 +1,67 @@
+package main
+
+import (
+	"TUBES3_13521102/netlify/functions/main/controller"
+	"TUBES3_13521102/netlify/functions/main/database"
+	"database/sql"
+	"fmt"
+	"log"
+  "net/http"
+
+	"github.com/gin-gonic/gin"
+	_ "github.com/go-sql-driver/mysql"
+)
+
+// Variables to connect to database host
+const (
+  username = "root"
+  host = "containers-us-west-13.railway.app"
+  password = "PNGO6atNekbjjq4g2yPy"
+  port = "6330"
+  databasetype = "railway"
+)
+
+
+var (
+  db *sql.DB
+)
+
+
+func main() {
+
+    db, err := sql.Open("mysql", database.ConnectDatabase(username, password, host, port, databasetype))
+    if (err != nil) {
+      fmt.Printf("Error %s while opening database\n", err)
+    }
+
+
+    pingErr := db.Ping()
+    if pingErr != nil {
+        log.Fatal(pingErr)
+    }
+    fmt.Println("Connected!")
+    defer db.Close()
+
+    r := gin.Default()
+
+    // CORS middleware
+    r.Use(func(c *gin.Context) {
+      c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+      c.Writer.Header().Set("Access-Control-Allow-Methods", "POST")
+      c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+      c.Next()
+    })
+    r.GET("/history", controller.GetAllHistoryMessage)
+
+    r.POST("/message", controller.InsertUserMessage)
+
+    r.OPTIONS("/getmessage", func(c *gin.Context) {
+      c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+      c.Writer.Header().Set("Access-Control-Allow-Methods", "POST")
+      c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+      c.Status(http.StatusOK)
+    })
+    r.POST("/getmessage", controller.ParseUserMessage)
+
+    r.Run()
+}
