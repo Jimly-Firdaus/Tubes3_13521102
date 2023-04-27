@@ -57,8 +57,10 @@ func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResp
         return response, err
       }
       response.Headers["Access-Control-Allow-Origin"] = "*"
-      log.Printf("Response headers: %v", response.Headers)
-      log.Printf("Response body: %s", response.Body)
+      // log.Printf("Response headers: %v", response.Headers)
+      fmt.Println("Response headers: %v", response.Headers)
+      fmt.Println("Response body: %s", response.Body)
+      // log.Printf("Response body: %s", response.Body)
       return response, nil
     }
 	case http.MethodPost:
