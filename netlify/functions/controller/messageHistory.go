@@ -49,7 +49,8 @@ func GetAllHistoryMessage(request events.APIGatewayProxyRequest) (*events.APIGat
         StatusCode: http.StatusOK,
         Body:       string(responseBody),
         Headers: map[string]string{
-            "Content-Type": "application/json",
+            "Content-Type":                "application/json",
+            "Access-Control-Allow-Origin": "*",
         },
     }, nil
 }
