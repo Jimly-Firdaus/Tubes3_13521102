@@ -48,7 +48,8 @@ func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResp
 	}
 	fmt.Println("Connected!")
 	defer db.Close()
-
+  fmt.Println("HTTP method: %s", request.HTTPMethod)
+  fmt.Println("Resource: %s", request.Resource)
 	switch request.HTTPMethod {
 	case http.MethodGet:
 		if request.Resource == "/history" {
