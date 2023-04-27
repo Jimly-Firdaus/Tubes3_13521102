@@ -1,6 +1,6 @@
 module TUBES3_13521102
 
-go 1.20
+go 1.17
 
 require (
 	github.com/akrylysov/algnhsa v1.0.0
