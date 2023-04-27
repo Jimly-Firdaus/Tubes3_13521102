@@ -10,7 +10,6 @@ import (
 
   "github.com/aws/aws-lambda-go/events"
   "github.com/aws/aws-lambda-go/lambda"
-  "github.com/akrylysov/algnhsa"
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -29,63 +28,58 @@ var (
 )
 
 func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResponse, error) {
-    // Create http.ResponseWriter and *http.Request from events.APIGatewayProxyRequest
-    w, r, err := algnhsa.NewResponseWriter(request), algnhsa.NewRequest(request)
-    if err != nil {
-        return &events.APIGatewayProxyResponse{
-            StatusCode: http.StatusInternalServerError,
-            Body:       err.Error(),
-        }, nil
-    }
+	db, err := sql.Open("mysql", database.ConnectDatabase(username, password, host, port, databasetype))
+	if err != nil {
+		fmt.Printf("Error %s while opening database\n", err)
+		return &events.APIGatewayProxyResponse{
+			StatusCode: http.StatusInternalServerError,
+			Body:       err.Error(),
+		}, nil
+	}
+	defer db.Close()
 
-    // Your server-side functionality
-    db, err := sql.Open("mysql", database.ConnectDatabase(username, password, host, port, databasetype))
-    if err != nil {
-        fmt.Printf("Error %s while opening database\n", err)
-        return &events.APIGatewayProxyResponse{
-            StatusCode: http.StatusInternalServerError,
-            Body:       err.Error(),
-        }, nil
-    }
-    defer db.Close()
+	pingErr := db.Ping()
+	if pingErr != nil {
+		log.Fatal(pingErr)
+		return &events.APIGatewayProxyResponse{
+			StatusCode: http.StatusInternalServerError,
+			Body:       pingErr.Error(),
+		}, nil
+	}
+	fmt.Println("Connected!")
 
-    pingErr := db.Ping()
-    if pingErr != nil {
-        log.Fatal(pingErr)
-        return &events.APIGatewayProxyResponse{
-            StatusCode: http.StatusInternalServerError,
-            Body:       pingErr.Error(),
-        }, nil
-    }
-    fmt.Println("Connected!")
-    defer db.Close()
+	switch request.HTTPMethod {
+	case http.MethodGet:
+		if request.Resource == "/history" {
+			return controller.GetAllHistoryMessage(request)
+		}
+	case http.MethodPost:
+		if request.Resource == "/getmessage" {
+			return controller.ParseUserMessage(request)
+		}
+	case http.MethodOptions:
+		if request.Resource == "/getmessage" {
+			headers := map[string]string{
+				"Access-Control-Allow-Origin":  "*",
+				"Access-Control-Allow-Methods": "POST",
+				"Access-Control-Allow-Headers": "Content-Type",
+			}
+			return &events.APIGatewayProxyResponse{
+				StatusCode: http.StatusOK,
+				Headers:    headers,
+			}, nil
+		}
+	default:
+		return &events.APIGatewayProxyResponse{
+			StatusCode: http.StatusMethodNotAllowed,
+			Body:       http.StatusText(http.StatusMethodNotAllowed),
+		}, nil
+	}
 
-    switch r.Method {
-    case http.MethodGet:
-        if r.URL.Path == "/history" {
-            // Handle GET /history request
-            controller.GetAllHistoryMessage(w, r)
-        }
-    case http.MethodPost:
-        if r.URL.Path == "/message" {
-            // Handle POST /message request
-            // ...
-        } else if r.URL.Path == "/getmessage" {
-            // Handle POST /getmessage request
-            controller.ParseUserMessage(w, r)
-        }
-    case http.MethodOptions:
-        if r.URL.Path == "/getmessage" {
-            // Handle OPTIONS /getmessage request
-            w.Header().Set("Access-Control-Allow-Origin", "*")
-            w.Header().Set("Access-Control-Allow-Methods", "POST")
-            w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
-            w.WriteHeader(http.StatusOK)
-            return algnhsa.ProxyResponse(w), nil
-        }
-    }
-
-    return algnhsa.ProxyResponse(w), nil
+    return &events.APIGatewayProxyResponse{
+      StatusCode: http.StatusNotImplemented,
+      Body:       http.StatusText(http.StatusNotImplemented),
+    }, nil
 }
 
 func main() {

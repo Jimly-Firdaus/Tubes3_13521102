@@ -6,25 +6,50 @@ import (
 	"log"
 	"net/http"
     "encoding/json"
+    "github.com/aws/aws-lambda-go/events"
 )
-func GetAllHistoryMessage(w http.ResponseWriter, r *http.Request) {
-    db, err := sql.Open("mysql", "root:PNGO6atNekbjjq4g2yPy@tcp(containers-us-west-13.railway.app:6330)/railway")
-    if err != nil {
-        http.Error(w, err.Error(), http.StatusInternalServerError)
-        return
+func GetAllHistoryMessage(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResponse, error) {
+	db, err := sql.Open("mysql", "root:PNGO6atNekbjjq4g2yPy@tcp(containers-us-west-13.railway.app:6330)/railway")
+	if err != nil {
+		return &events.APIGatewayProxyResponse{
+			StatusCode: http.StatusInternalServerError,
+			Body:       err.Error(),
+		}, nil
+	}
+	defer db.Close()
+
+	pingErr := db.Ping()
+	if pingErr != nil {
+		log.Fatal(pingErr)
+		return &events.APIGatewayProxyResponse{
+			StatusCode: http.StatusInternalServerError,
+			Body:       pingErr.Error(),
+		}, nil
+	}
+
+	historyMessageList, err := repository.GetAllHistoryMessage(db)
+	if err != nil {
+		return &events.APIGatewayProxyResponse{
+			StatusCode: http.StatusInternalServerError,
+			Body:       err.Error(),
+		}, nil
+	}
+
+	responseBody, err := json.Marshal(map[string]interface{}{
+		"historyMessage": historyMessageList,
+	})
+	if err != nil {
+        return &events.APIGatewayProxyResponse{
+            StatusCode: http.StatusInternalServerError,
+            Body:       err.Error(),
+        }, nil
     }
-    pingErr := db.Ping()
-    if pingErr != nil {
-        log.Fatal(pingErr)
-    }
-
-    defer db.Close()
-
-    historyMessageList, err := repository.GetAllHistoryMessage(db)
-
-    // Write response as JSON
-    w.Header().Set("Content-Type", "application/json")
-    json.NewEncoder(w).Encode(map[string]interface{}{
-        "historyMessage": historyMessageList,
-    })
+    
+    return &events.APIGatewayProxyResponse{
+        StatusCode: http.StatusOK,
+        Body:       string(responseBody),
+        Headers: map[string]string{
+            "Content-Type": "application/json",
+        },
+    }, nil
 }
