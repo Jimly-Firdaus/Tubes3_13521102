@@ -82,41 +82,42 @@ func GetUserMessageByID(c *gin.Context){
    })
 }
 func ParseUserMessage(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResponse, error) {
-	// Parse the request body into a Request struct
-	var req structs.Request
-	if err := json.Unmarshal([]byte(request.Body), &req); err != nil {
-		return &events.APIGatewayProxyResponse{
-			StatusCode: http.StatusBadRequest,
-			Body:       err.Error(),
-		}, nil
-	}
-
-	// Use the message and method fields in the Request struct
-	fmt.Println(req.Id)
-	fmt.Println(req.Text)
-	fmt.Println(req.Response)
-	fmt.Println(req.SentTime)
-	fmt.Println(req.HistoryId)
-	fmt.Println(req.HistoryTimeStamp)
-	fmt.Println(req.Method)
-
-	// Write a response back to the client
-	responseBody, err := json.Marshal(map[string]interface{}{
-		"message": "Received request successfully",
-	})
-  if err != nil {
-    return &events.APIGatewayProxyResponse{
-      StatusCode: http.StatusInternalServerError,
-      Body:       err.Error(),
-    }, nil
+  // Parse the request body into a Request struct
+  var req structs.Request
+  if err := json.Unmarshal([]byte(request.Body), &req); err != nil {
+      return &events.APIGatewayProxyResponse{
+          StatusCode: http.StatusBadRequest,
+          Body:       err.Error(),
+      }, nil
   }
-  
+
+  // Use the message and method fields in the Request struct
+  fmt.Println(req.Id)
+  fmt.Println(req.Text)
+  fmt.Println(req.Response)
+  fmt.Println(req.SentTime)
+  fmt.Println(req.HistoryId)
+  fmt.Println(req.HistoryTimeStamp)
+  fmt.Println(req.Method)
+
+  // Write a response back to the client
+  responseBody, err := json.Marshal(map[string]interface{}{
+      "message": "Received request successfully",
+  })
+  if err != nil {
+      return &events.APIGatewayProxyResponse{
+          StatusCode: http.StatusInternalServerError,
+          Body:       err.Error(),
+      }, nil
+  }
+
   return &events.APIGatewayProxyResponse{
-    StatusCode: http.StatusOK,
-    Body:       string(responseBody),
-    Headers: map[string]string{
-      "Content-Type": "application/json",
-    },
+      StatusCode: http.StatusOK,
+      Body:       string(responseBody),
+      Headers: map[string]string{
+          "Content-Type":                "application/json",
+          "Access-Control-Allow-Origin": "*",
+      },
   }, nil
 }
 // func GetAllUserMessageHandler(r *gin.Engine){
