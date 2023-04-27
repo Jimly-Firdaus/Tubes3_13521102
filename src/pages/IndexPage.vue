@@ -143,9 +143,9 @@ const sendMessage = async () => {
 
       method: method.value as "KMP" | "BoyerMoore",
     };
-    // console.log(request);
+
     // Unload response from api
-    const response = await api.post("http://localhost:8080/getmessage", request);
+    const response = await api.post("https://iridescent-jalebi-788066.netlify.app/.netlify/functions/endpoint/getmessage", request);
     console.log(response.data);
 
     // Clear input
