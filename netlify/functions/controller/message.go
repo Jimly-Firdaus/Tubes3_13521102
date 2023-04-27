@@ -1,8 +1,8 @@
 package controller
 
 import (
-	"TUBES3_13521102/netlify/functions/main/repository"
-	"TUBES3_13521102/netlify/functions/main/structs"
+	"TUBES3_13521102/netlify/functions/repository"
+	"TUBES3_13521102/netlify/functions/structs"
 	"database/sql"
 	"fmt"
 	"log"

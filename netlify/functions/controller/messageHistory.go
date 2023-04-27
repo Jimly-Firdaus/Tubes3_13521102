@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"TUBES3_13521102/netlify/functions/main/repository"
+	"TUBES3_13521102/netlify/functions/repository"
 	"database/sql"
 	"log"
 	"net/http"

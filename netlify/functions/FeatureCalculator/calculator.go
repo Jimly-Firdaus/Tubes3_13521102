@@ -1,7 +1,7 @@
 package FeatureCalculator
 
 import (
-	"TUBES3_13521102/netlify/functions/main/Class"
+	"TUBES3_13521102/netlify/functions/Class"
 	"fmt"
 	"strconv"
 	"strings"

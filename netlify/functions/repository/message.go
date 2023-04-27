@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"TUBES3_13521102/netlify/functions/main/structs"
+	"TUBES3_13521102/netlify/functions/structs"
 	"database/sql"
 )
 
