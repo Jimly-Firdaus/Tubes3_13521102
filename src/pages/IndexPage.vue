@@ -46,7 +46,7 @@ const fetchHistories = async () => {
   $q.loading.show({
     message: 'Fetching important resouces. Hang on...'
   });
-  const response = await api.get("http://localhost:8080/history");
+  const response = await api.get("https://iridescent-jalebi-788066.netlify.app/.netlify/functions/main/history");
   const fetchedMessageHistory: [] = response.data.historyMessage.messageHistory;
   fetchedMessageHistory.forEach((ele: History, index) => {
     // console.log(ele);
