@@ -1,13 +1,15 @@
 package main
 
 import (
-	"TUBES3_13521102/src-backend/controller"
-	"TUBES3_13521102/src-backend/database"
+	// "TUBES3_13521102/src-backend/controller"
+	// "TUBES3_13521102/src-backend/database"
+  // "TUBES3_13521102/src-backend/FeatureCalculator"
+  "TUBES3_13521102/src-backend/FeatureDate"
 	"database/sql"
 	"fmt"
-	"log"
+	// "log"
 
-	"github.com/gin-gonic/gin"
+	// "github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -27,10 +29,10 @@ var (
 
 
 func main() {
-    // date := "25/02/2023"
+    date := "6/2/2003"
 
-    // dayName := FeatureDate.DateDayName(date)
-    // fmt.Println(dayName)
+    testDayName := FeatureDate.FindDayName(date)
+    fmt.Println(testDayName)
 
     // hasil, err := FeatureCalculator.CalculateExpression("((-8.05) + 3)")
 
@@ -56,24 +58,24 @@ func main() {
     //   fmt.Println(message.HistoryId)
     // }
 
-    db, err := sql.Open("mysql", database.ConnectDatabase(username, password, host, port, databasetype))
-    if (err != nil) {
-      fmt.Printf("Error %s while opening database\n", err)
-    }
+    // db, err := sql.Open("mysql", database.ConnectDatabase(username, password, host, port, databasetype))
+    // if (err != nil) {
+    //   fmt.Printf("Error %s while opening database\n", err)
+    // }
 
 
-    pingErr := db.Ping()
-    if pingErr != nil {
-        log.Fatal(pingErr)
-    }
-    fmt.Println("Connected!")
-    defer db.Close()
+    // pingErr := db.Ping()
+    // if pingErr != nil {
+    //     log.Fatal(pingErr)
+    // }
+    // fmt.Println("Connected!")
+    // defer db.Close()
 
-    r := gin.Default()
+    // r := gin.Default()
 
-    r.GET("/history", controller.GetAllHistoryMessage)
+    // r.GET("/history", controller.GetAllHistoryMessage)
 
-    r.POST("/message", controller.InsertUserMessage)
+    // r.POST("/message", controller.InsertUserMessage)
 
-    r.Run()
+    // r.Run()
 }
