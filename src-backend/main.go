@@ -8,6 +8,7 @@ import (
 	"database/sql"
 	"fmt"
 	// "log"
+  // "net/http"
 
 	// "github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
@@ -73,9 +74,22 @@ func main() {
 
     // r := gin.Default()
 
+    // CORS middleware
+    // r.Use(func(c *gin.Context) {
+    //   c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+    //   c.Writer.Header().Set("Access-Control-Allow-Methods", "POST")
+    //   c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+    //   c.Next()
+    // })
     // r.GET("/history", controller.GetAllHistoryMessage)
 
-    // r.POST("/message", controller.InsertUserMessage)
+    // r.OPTIONS("/getmessage", func(c *gin.Context) {
+    //   c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+    //   c.Writer.Header().Set("Access-Control-Allow-Methods", "POST")
+    //   c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+    //   c.Status(http.StatusOK)
+    // })
+    // r.POST("/getmessage", controller.ParseUserMessage)
 
     // r.Run()
 }
