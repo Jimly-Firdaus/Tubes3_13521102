@@ -1,7 +1,6 @@
 package FeatureDate
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
 )
@@ -23,19 +22,19 @@ func StringtoInteger (number string) int {
 // Get day's name
 func GetDayName(number int) string {
   if (number == 0) {
-    return "Sunday"
+    return "Hari Minggu"
   } else if (number == 1) {
-    return "Monday"
+    return "Hari Senin"
   } else if (number == 2) {
-    return "Tuesday"
+    return "Hari Selasa"
   } else if (number == 3) {
-    return "Wednesday"
+    return "Hari Rabu"
   } else if (number == 4) {
-    return "Thursday"
+    return "Hari Kamis"
   } else if (number == 5) {
-    return "Friday"
+    return "Hari Jumat"
   } else {
-    return "Saturday"
+    return "Hari Sabtu"
   }
 }
 
@@ -73,7 +72,7 @@ func CheckDateValid(day int, month int, year int) bool {
     return false
 
   }
-  
+
   return true
 }
 
@@ -136,15 +135,8 @@ func FindDayName(date string) string {
   var D = year % 100
   var C = year / 100
 
-  fmt.Println(day)
-  fmt.Println(month)
-  fmt.Println(year)
-  fmt.Println(D)
-  fmt.Println(C)
-
   // Calculate the F value
   var F = day + ((13*month-1)/5) + D + (D/4) + (C/4)-2*C
-  fmt.Println(F)
 
   // Then we calculate the day by using F mod 7
   var dayNumber = F % 7
