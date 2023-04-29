@@ -89,4 +89,24 @@ func GetBotResponseByResponseID(db *sql.DB, responseID int64) (results []structs
   return
 }
 
+// Check if a question is already in the BotResponse table or not
+func CheckBotResponse(db *sql.DB, question string) bool {
+  rows, err := db.Query("SELECT * FROM BotResponse WHERE question = ?", question)
+
+  if err != nil {
+    panic(err)
+  }
+
+  defer rows.Close()
+
+  // Counting rows
+  var count = 0
+
+  for rows.Next() {
+    count++
+  }
+
+  return count != 0
+}
+
 
