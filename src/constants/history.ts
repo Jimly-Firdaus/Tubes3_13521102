@@ -69,3 +69,12 @@ export const history2: History = {
 export const allHistory: MessageHistory = reactive({
   messageHistory: [history1, history2],
 });
+
+export const confusedResponse = [
+  "Could you please clarify your question? Here are some options that might be relevant:\n",
+  "I’m not sure I understand. Did you mean one of these options?\n",
+  "I want to make sure I provide the most accurate response. Which of these options best matches your question?\n",
+  "I’m sorry, but I’m having trouble understanding your message. Could you please select one of these options to help me understand better?\n",
+  "I’m not quite sure what you’re asking. Here are some options that might be relevant to your question:\n",
+  "To provide the most accurate response, could you please choose one of these options that best matches your question?\n"
+]
