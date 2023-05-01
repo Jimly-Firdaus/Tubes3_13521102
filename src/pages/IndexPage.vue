@@ -8,7 +8,7 @@ import {
 } from "src/constants";
 import { ref, Ref, watch, reactive, onMounted, computed } from "vue";
 import { QScrollArea, useQuasar } from "quasar";
-import { dummyResponse } from "src/constants/history";
+import { dummyResponse, confusedResponse } from "src/constants/history";
 import { useUtility } from "src/composables/useUtility";
 import { useMessages } from "src/composables/useMessages";
 import { botAvatar, userAvatar } from "src/constants/avatar";
@@ -144,26 +144,27 @@ const sendMessage = async () => {
       method: method.value as "KMP" | "BoyerMoore",
     };
 
-    // Unload response from api
+    // Clear input
+    userInput.value = "";
+    // Fetch response from backend
     const response = await api.post("https://iridescent-jalebi-788066.netlify.app/.netlify/functions/endpoint/getmessage", request);
     console.log(response.data);
 
-    // Clear input
-    userInput.value = "";
+    // Unload response from api
+    if (response.data.message === "200") {
+      botFullResponse.value = response.data.botResponse.response;
+    } else {
+      const confusedText = confusedResponse[random()];
+      botFullResponse.value = confusedText + response.data.botResponse.response;
+      botFullResponse.value = botFullResponse.value.replace(/\n/g, '<br>');
+    }
+    
+    messages[messages.length - 1].setResponse(botFullResponse.value, 200);
+    await animateMessage(botFullResponse.value);
+    messages[messages.length - 1].setResponseStatus(true);
+    botResponse.value = "";
+    isResponding.value = false;
 
-    setTimeout(async () => {
-      // Fetch response from backend
-      botFullResponse.value = dummyResponse[random()];
-
-      // Store the result
-      messages[messages.length - 1].setResponse(botFullResponse.value, 200);
-
-      // Show result
-      await animateMessage(botFullResponse.value);
-      messages[messages.length - 1].setResponseStatus(true);
-      botResponse.value = "";
-      isResponding.value = false;
-    }, 1500);
     if (messages.length === 1) {
       const currentMessages = messages.slice();
       const newHistory: History = {
@@ -393,10 +394,10 @@ onMounted(() => {
                           !message.getResponseStatus()
                         "
                       >
-                        {{ botResponse }}
+                        <div v-html="botResponse"></div>
                       </template>
                       <template v-else>
-                        {{ message.getResponseMsg() }}
+                        <div v-html="message.getResponseMsg()"></div>
                       </template>
                     </div>
                   </template>
