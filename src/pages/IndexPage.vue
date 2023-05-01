@@ -148,14 +148,21 @@ const sendMessage = async () => {
     userInput.value = "";
     // Fetch response from backend
     const response = await api.post("https://iridescent-jalebi-788066.netlify.app/.netlify/functions/endpoint/getmessage", request);
-    console.log(response.data);
+    console.log(response.data.botResponse);
 
     // Unload response from api
     if (response.data.message === "200") {
       botFullResponse.value = response.data.botResponse.response;
     } else {
       const confusedText = confusedResponse[random()];
-      botFullResponse.value = confusedText + response.data.botResponse.response;
+      const choiceArr = response.data.botResponse.response.split("<-|->");
+      botFullResponse.value = confusedText;
+      choiceArr.forEach((choice: string, index: number) => {
+        if (choice !== "") {
+          botFullResponse.value += (index + 1) + ". " + choice + "\n";
+        }
+      })
+      botFullResponse.value += "Please rewrite the question if you desire to choose from the above!";
       botFullResponse.value = botFullResponse.value.replace(/\n/g, '<br>');
     }
     
