@@ -8,7 +8,7 @@ import {
 } from "src/constants";
 import { ref, Ref, watch, reactive, onMounted, computed } from "vue";
 import { QScrollArea, useQuasar } from "quasar";
-import { dummyResponse, confusedResponse } from "src/constants/history";
+import { greetings, confusedResponse } from "src/constants/history";
 import { useUtility } from "src/composables/useUtility";
 import { useMessages } from "src/composables/useMessages";
 import { botAvatar, userAvatar } from "src/constants/avatar";
@@ -79,15 +79,18 @@ const botFullResponse: Ref<string> = ref("");
 const isResponding: Ref<boolean> = ref(false);
 
 const { animateMessage, random, generateTimestamp } = useUtility({
-  startNum: 1,
-  endNum: 6,
+  startNum: 0,
+  endNum: 5,
   botMessage: botResponse,
   duration: 20,
 });
 
+const botGreetings = ref(greetings[random()]);
 const method = ref("KMP");
 
 const newChat = () => {
+  console.log(random());
+  botGreetings.value = greetings[random()];
   currentConversationID.value = chatHistories.messageHistory.length + 1;
   messages.splice(0, messages.length);
 };
@@ -372,7 +375,7 @@ onMounted(() => {
                 bg-color="grey-1"
                 text-color="white"
               >
-                <div class="text-lg-body">Hi, how can i help you today ?</div>
+                <div class="text-lg-body">{{ botGreetings }}</div>
               </q-chat-message>
               <div v-for="message in messages" :key="message.getId()">
                 <q-chat-message

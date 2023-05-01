@@ -78,3 +78,12 @@ export const confusedResponse = [
   "I’m not quite sure what you’re asking. Here are some options that might be relevant to your question:\n",
   "To provide the most accurate response, could you please choose one of these options that best matches your question?\n"
 ]
+
+export const greetings = [
+  "Hi there! How can I help you today?",
+  "Hello! What can I do for you today?",
+  "Greetings! How can I assist you today?",
+  "Hi! What can I help you with today?", 
+  "Hello there! How can I be of service today?",
+  "Hi! What can I do for you today?",
+]
