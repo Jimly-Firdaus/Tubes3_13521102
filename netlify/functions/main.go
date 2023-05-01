@@ -53,7 +53,7 @@ func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResp
 		fmt.Printf("Request: %+v\n", request)
 		fmt.Println("Hit history get")
 		if request.Path == "/.netlify/functions/endpoint/history" {
-			response, err := controller.GetAllHistoryMessage(request)
+			response, err := controller.GetAllHistoryMessage(request, db)
 			if err != nil {
 				return response, err
 			}
