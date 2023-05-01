@@ -67,7 +67,7 @@ func GetResponse(req *structs.Request, index int, db *sql.DB) {
 				}
 			}
 
-		} else { // Boyer-Moore
+		} else if req.Method == "BoyerMoore" { // Boyer-Moore
 			for _, question := range questions {
 				dbq := strings.ToLower(question.Question)
 				text := strings.ToLower(req.Text)
