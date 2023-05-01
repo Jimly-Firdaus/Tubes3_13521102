@@ -70,6 +70,12 @@ module.exports = configure(function (/* ctx */) {
       // publicPath: '/',
       // analyze: true,
       // env: {},
+      env: {
+        ...require("dotenv").config().parsed,
+        ENV: process.env.ENV,
+        OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+        OPENAI_ORGANIZATION: process.env.OPENAI_ORGANIZATION,
+      }
       // rawDefine: {}
       // ignorePublicFolder: true,
       // minify: false,
