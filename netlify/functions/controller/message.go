@@ -97,12 +97,13 @@ func ParseUserMessage(request events.APIGatewayProxyRequest, db *sql.DB) (*event
 	fmt.Println(req.HistoryId)
 	fmt.Println(req.HistoryTimeStamp)
 	fmt.Println(req.Method)
-	Response = FilterMessage(req, db)
+	req.Response = FilterMessage(req, db)
 	// Parameter jadi struct.
 	// TO DO : Masukin database
 	// Write a response back to the client
 	responseBody, err := json.Marshal(map[string]interface{}{
-		"message": "Received request successfully",
+		"message":     "Received request successfully",
+		"botResponse": req,
 	})
 	if err != nil {
 		return &events.APIGatewayProxyResponse{

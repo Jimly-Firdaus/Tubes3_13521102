@@ -38,18 +38,18 @@ func GetResponse(req structs.Request, index int, db *sql.DB) {
 	// Fitur Tambah Pertanyaan
 	if index == 1 {
 		// Split
-		return ""
+		return
 	} else if index == 2 { // Fitur Hapus Pertanyaan
 		// Split
-		return ""
+		return
 	} else if index == 3 { // Fitur Kalendar
 		// Split ada
-		return ""
+		return
 	} else if index == 4 { //  Fitur Kalkulator
-		return ""
+		return
 	} else if index == 5 { // Fitur Pertanyaan Teks
-		return ""
+		return
 	} else {
-		return ""
+		return
 	}
 }
