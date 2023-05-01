@@ -6,25 +6,24 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
-  "net/http"
+	"net/http"
 
-  "github.com/aws/aws-lambda-go/events"
-  "github.com/aws/aws-lambda-go/lambda"
+	"github.com/aws/aws-lambda-go/events"
+	"github.com/aws/aws-lambda-go/lambda"
 	_ "github.com/go-sql-driver/mysql"
 )
 
 // Variables to connect to database host
 const (
-  username = "root"
-  host = "containers-us-west-13.railway.app"
-  password = "PNGO6atNekbjjq4g2yPy"
-  port = "6330"
-  databasetype = "railway"
+	username     = "root"
+	host         = "containers-us-west-13.railway.app"
+	password     = "PNGO6atNekbjjq4g2yPy"
+	port         = "6330"
+	databasetype = "railway"
 )
 
-
 var (
-  db *sql.DB
+	db *sql.DB
 )
 
 func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResponse, error) {
@@ -54,19 +53,22 @@ func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResp
 		fmt.Printf("Request: %+v\n", request)
 		fmt.Println("Hit history get")
 		if request.Path == "/.netlify/functions/endpoint/history" {
-      response, err := controller.GetAllHistoryMessage(request)
-      if err != nil {
-        return response, err
-      }
-      response.Headers["Access-Control-Allow-Origin"] = "*"
-	  fmt.Println("Response headers: %v", response.Headers)
-      fmt.Println("Response body: %s", response.Body)
-	  fmt.Println("Hit history")
-      return response, nil
-    }
+			response, err := controller.GetAllHistoryMessage(request)
+			if err != nil {
+				return response, err
+			}
+			response.Headers["Access-Control-Allow-Origin"] = "*"
+			fmt.Println("Response headers: %v", response.Headers)
+			fmt.Println("Response body: %s", response.Body)
+			fmt.Println("Hit history")
+			return response, nil
+		}
+		//  else if request.Path == ".netlify/functions/endpoint/giveresponse" {
+		// 	response, err := controller.GetAllHistoryMessage(request)
+		// }
 	case http.MethodPost:
 		if request.Path == "/.netlify/functions/endpoint/getmessage" {
-			return controller.ParseUserMessage(request)
+			return controller.ParseUserMessage(request, db)
 		}
 	case http.MethodOptions:
 		if request.Path == "/.netlify/functions/endpoint/getmessage" {
@@ -92,13 +94,13 @@ func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResp
 	fmt.Println("HTTP method: %s", request.HTTPMethod)
 	fmt.Println("Resource: %s", request.Resource)
 	fmt.Println("Hit outside switch")
-    return &events.APIGatewayProxyResponse{
-      StatusCode: http.StatusNotImplemented,
-      Body:       http.StatusText(http.StatusNotImplemented),
-    }, nil
+	return &events.APIGatewayProxyResponse{
+		StatusCode: http.StatusNotImplemented,
+		Body:       http.StatusText(http.StatusNotImplemented),
+	}, nil
 }
 
 func main() {
-  // Make the handler available for Remote Procedure Call
-  lambda.Start(handler)
+	// Make the handler available for Remote Procedure Call
+	lambda.Start(handler)
 }
