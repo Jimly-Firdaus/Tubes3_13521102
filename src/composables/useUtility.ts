@@ -10,6 +10,7 @@ export const useUtility = ({
   botMessage?: Ref<string> | WritableComputedRef<string>;
   duration?: number;
 } = {}) => {
+  console.log(`startNum: ${startNum}, endNum: ${endNum}`);
   /**
    * Wait for duration in millis
    */
@@ -42,8 +43,11 @@ export const useUtility = ({
    * otherwise return -1
    * */
   const random = (): number => {
-    if (startNum && endNum) {
-      return Math.floor(Math.random() * endNum) + startNum;
+    if (startNum !== undefined && endNum !== undefined) {
+      if (startNum >= 0 && endNum >= 0) {
+        return Math.floor(Math.random() * (endNum - startNum + 1)) + startNum;
+      }
+      return 0;
     }
     return -1;
   };
