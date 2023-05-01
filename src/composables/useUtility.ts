@@ -22,8 +22,15 @@ export const useUtility = ({
     let i = 0;
     if (botMessage) {
       while (i <= botFullMessage.length) {
-        botMessage.value +=
-          botFullMessage.charAt(i) + botFullMessage.charAt(i + 1);
+        let char1 = botFullMessage.charAt(i);
+        let char2 = botFullMessage.charAt(i + 1);
+        if (char1 === '\n') {
+          char1 = '<br>';
+        }
+        if (char2 === '\n') {
+          char2 = '<br>';
+        }
+        botMessage.value += char1 + char2;
         i = i + 2;
         await wait();
       }
