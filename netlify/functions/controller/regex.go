@@ -7,10 +7,11 @@ import (
 	"database/sql"
 	"regexp"
 	"sort"
+	"strconv"
 	"strings"
 )
 
-func FilterMessage(req *structs.Request, db *sql.DB) {
+func FilterMessage(req *structs.Request, stat *string, db *sql.DB) {
 	// Define multiple regex patterns
 	patterns := []string{
 		`^(?i)Tambahkan pertanyaan (.*) dengan jawaban (.*)$`, // Tambah pertanyaan
@@ -32,13 +33,13 @@ func FilterMessage(req *structs.Request, db *sql.DB) {
 	for i, regex := range regexes {
 		if regex.MatchString(req.Text) {
 			// fmt.Printf("String '%s' matches pattern %d\n", text, i+1)
-			GetResponse(req, i+1, db)
+			GetResponse(req, i+1, stat, db)
 			return
 		}
 	}
 }
 
-func GetResponse(req *structs.Request, index int, db *sql.DB) {
+func GetResponse(req *structs.Request, index int, stat *string, db *sql.DB) {
 	// Fitur Tambah Pertanyaan
 	if index == 1 {
 		// Split
@@ -78,6 +79,7 @@ func GetResponse(req *structs.Request, index int, db *sql.DB) {
 			}
 		}
 		// No match found
+		*stat = "404"
 		qList := []struct {
 			i float64
 			s string
@@ -94,17 +96,17 @@ func GetResponse(req *structs.Request, index int, db *sql.DB) {
 			})
 		}
 		// Sort Descending by Percentage value
-		req.Response = "Pertanyaan tidak ditemukan di database.\nApakah maksud anda:\n"
+		req.Response = ""
 		sort.Slice(qList, func(i, j int) bool {
 			return qList[i].i > qList[j].i
 		})
 		if len(qList) > 3 {
 			for i := 0; i < 3; i++ {
-				req.Response = req.Response + qList[i].s + "\n"
+				req.Response = strconv.Itoa(i+1) + ". " + req.Response + qList[i].s + "\n"
 			}
 		} else {
 			for i := 0; i < len(qList); i++ {
-				req.Response = req.Response + qList[i].s + "\n"
+				req.Response = strconv.Itoa(i+1) + ". " + req.Response + qList[i].s + "\n"
 			}
 		}
 		return

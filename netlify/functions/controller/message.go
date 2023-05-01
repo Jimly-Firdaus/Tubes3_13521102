@@ -82,6 +82,7 @@ func GetUserMessageByID(c *gin.Context) {
 func ParseUserMessage(request events.APIGatewayProxyRequest, db *sql.DB) (*events.APIGatewayProxyResponse, error) {
 	// Parse the request body into a Request struct
 	var req structs.Request
+	var status string
 	if err := json.Unmarshal([]byte(request.Body), &req); err != nil {
 		return &events.APIGatewayProxyResponse{
 			StatusCode: http.StatusBadRequest,
@@ -97,12 +98,13 @@ func ParseUserMessage(request events.APIGatewayProxyRequest, db *sql.DB) (*event
 	fmt.Println(req.HistoryId)
 	fmt.Println(req.HistoryTimeStamp)
 	fmt.Println(req.Method)
-	FilterMessage(&req, db)
+	status = "200"
+	FilterMessage(&req, &status, db)
 	// Parameter jadi struct.
 	// TO DO : Masukin database
 	// Write a response back to the client
 	responseBody, err := json.Marshal(map[string]interface{}{
-		"message":     "200",
+		"message":     status,
 		"botResponse": req,
 	})
 	if err != nil {
