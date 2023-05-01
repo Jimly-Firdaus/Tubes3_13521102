@@ -97,7 +97,7 @@ func ParseUserMessage(request events.APIGatewayProxyRequest, db *sql.DB) (*event
 	fmt.Println(req.HistoryId)
 	fmt.Println(req.HistoryTimeStamp)
 	fmt.Println(req.Method)
-	req.Response = FilterMessage(req, db)
+	FilterMessage(&req, db)
 	// Parameter jadi struct.
 	// TO DO : Masukin database
 	// Write a response back to the client

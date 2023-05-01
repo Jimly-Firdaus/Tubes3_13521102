@@ -1,6 +1,6 @@
 package FeatureStringmatching
 
-func minList(numbers ...int) int {
+func MinList(numbers ...int) int {
 	min := numbers[0]
 	for _, num := range numbers {
 		if num < min {
@@ -10,7 +10,7 @@ func minList(numbers ...int) int {
 	return min
 }
 
-func levenshteinDistance(s, t string) int {
+func LevenshteinDistance(s, t string) float64 {
 	m := len(s)
 	n := len(t)
 	matrix := make([][]int, m+1)
@@ -27,16 +27,16 @@ func levenshteinDistance(s, t string) int {
 			if s[i-1] == t[j-1] {
 				cost = 0
 			}
-			matrix[i][j] = minList(
+			matrix[i][j] = MinList(
 				matrix[i-1][j]+1,
 				matrix[i][j-1]+1,
 				matrix[i-1][j-1]+cost,
 			)
 		}
 	}
-	return matrix[m][n]
+	//return matrix[m][n]
+	return (float64(1) - (float64(matrix[m][n]) / float64(len(s))))
 }
-
 
 // tester
 // func main() {
