@@ -63,40 +63,49 @@ func GetResponse(req *structs.Request, index int, db *sql.DB) {
 				text := strings.ToLower(req.Text)
 				if FeatureStringmatching.BmMatch(dbq, text) != -1 {
 					req.Response = question.Answer
+					return
 				}
-			} // No match found
-			qList := []struct {
+			}
+
+		} else { // Boyer-Moore
+			for _, question := range questions {
+				dbq := strings.ToLower(question.Question)
+				text := strings.ToLower(req.Text)
+				if FeatureStringmatching.KMP(dbq, text) != -1 {
+					req.Response = question.Answer
+					return
+				}
+			}
+		}
+		// No match found
+		qList := []struct {
+			i float64
+			s string
+		}{}
+		for _, question := range questions {
+			req := req.Text
+			distance := FeatureStringmatching.LevenshteinDistance(question.Question, req)
+			qList = append(qList, struct {
 				i float64
 				s string
-			}{}
-			for _, question := range questions {
-				req := req.Text
-				distance := FeatureStringmatching.LevenshteinDistance(question.Question, req)
-				qList = append(qList, struct {
-					i float64
-					s string
-				}{
-					i: distance,
-					s: question.Question,
-				})
-			}
-			// Sort Descending by Percentage value
-			req.Response = "Pertanyaan tidak ditemukan di database.\nApakah maksud anda:\n"
-			sort.Slice(qList, func(i, j int) bool {
-				return qList[i].i > qList[j].i
+			}{
+				i: distance,
+				s: question.Question,
 			})
-			if len(qList) > 3 {
-				for i := 0; i < 3; i++ {
-					req.Response = req.Response + qList[i].s + "\n"
-				}
-			} else {
-				for i := 0; i < len(qList); i++ {
-					req.Response = req.Response + qList[i].s + "\n"
-				}
+		}
+		// Sort Descending by Percentage value
+		req.Response = "Pertanyaan tidak ditemukan di database.\nApakah maksud anda:\n"
+		sort.Slice(qList, func(i, j int) bool {
+			return qList[i].i > qList[j].i
+		})
+		if len(qList) > 3 {
+			for i := 0; i < 3; i++ {
+				req.Response = req.Response + qList[i].s + "\n"
 			}
-
 		} else {
-
+			for i := 0; i < len(qList); i++ {
+				req.Response = req.Response + qList[i].s + "\n"
+			}
 		}
 		return
 	} else {

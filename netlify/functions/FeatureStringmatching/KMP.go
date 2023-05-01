@@ -1,7 +1,5 @@
 package FeatureStringmatching
 
-import "fmt"
-
 func ComputeBorder(substr string) []int {
 	table := make([]int, len(substr))
 	table[0] = 0
@@ -28,17 +26,14 @@ func KMP(str string, substr string) int {
 	len_sub := len(substr)
 	table := ComputeBorder(substr)
 
-	// Heuristic simple search
-	if len_sub > len_str {
-		return 0
-	}
-	if len_sub == len_str {
-		if str == substr {
-			return 1
-		} else {
-			return 0
-		}
-	}
+	//  Heuristic simple search
+	// if len_sub == len_str {
+	// 	if str == substr {
+	// 		return 1
+	// 	} else {
+	// 		return -1
+	// 	}
+	// }
 
 	i, j := 0, 0
 	for i < len_str {
@@ -54,12 +49,12 @@ func KMP(str string, substr string) int {
 			j = table[j-1]
 		}
 		if len_sub == j {
-			fmt.Printf("Disini kah?\n")
 			return 1
 		}
 	}
 	return -1
 }
+
 // Main tester
 // func main() {
 // 	s := "Bagaimana algoritma genetika bekerja?"
