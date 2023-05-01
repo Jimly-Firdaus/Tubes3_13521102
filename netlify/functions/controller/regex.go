@@ -102,11 +102,11 @@ func GetResponse(req *structs.Request, index int, stat *string, db *sql.DB) {
 		})
 		if len(qList) > 3 {
 			for i := 0; i < 3; i++ {
-				req.Response = strconv.Itoa(i+1) + ". " + req.Response + qList[i].s + "\n"
+				req.Response = req.Response + qList[i].s + "<-|->"
 			}
 		} else {
 			for i := 0; i < len(qList); i++ {
-				req.Response = strconv.Itoa(i+1) + ". " + req.Response + qList[i].s + "\n"
+				req.Response = req.Response + qList[i].s + "<-|->"
 			}
 		}
 		return
