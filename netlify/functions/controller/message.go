@@ -102,7 +102,7 @@ func ParseUserMessage(request events.APIGatewayProxyRequest, db *sql.DB) (*event
 	// TO DO : Masukin database
 	// Write a response back to the client
 	responseBody, err := json.Marshal(map[string]interface{}{
-		"message":     "Received request successfully",
+		"message":     "200",
 		"botResponse": req,
 	})
 	if err != nil {
