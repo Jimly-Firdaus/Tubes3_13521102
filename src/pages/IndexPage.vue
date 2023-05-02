@@ -18,7 +18,7 @@ const $q = useQuasar();
 const BREAKPOINT = 1024;
 const isSmallScreen = computed(() => $q.screen.width < BREAKPOINT);
 
-const splitter = computed(() => (isSmallScreen.value ? 0 : 20));
+const splitter = computed(() => (isSmallScreen.value ? 0 : 30));
 const drawer = ref(false);
 const scrollArea = ref<QScrollArea | null>(null);
 const scrollToBottom = () => {
@@ -51,7 +51,6 @@ const fetchHistories = async () => {
   );
   const fetchedMessageHistory: [] = response.data.historyMessage.messageHistory;
   fetchedMessageHistory.forEach((ele: History, index) => {
-    // console.log(ele);
     const arrayOfConversation: Array<MessageInterface> = [];
     ele.conversation.forEach((messageJSON, index) => {
       const message = new Message(
@@ -80,18 +79,18 @@ const botResponse: Ref<string> = ref("");
 const botFullResponse: Ref<string> = ref("");
 const isResponding: Ref<boolean> = ref(false);
 
-const { animateMessage, random, generateTimestamp } = useUtility({
-  startNum: 0,
-  endNum: 5,
-  botMessage: botResponse,
-  duration: 20,
-});
+const { animateMessage, random, generateTimestamp } =
+  useUtility({
+    startNum: 0,
+    endNum: 5,
+    botMessage: botResponse,
+    duration: 20,
+  });
 
 const botGreetings = ref(greetings[random()]);
 const method = ref("KMP");
 
 const newChat = () => {
-  console.log(random());
   botGreetings.value = greetings[random()];
   currentConversationID.value = chatHistories.messageHistory.length + 1;
   messages.splice(0, messages.length);
@@ -144,33 +143,44 @@ const sendMessage = async () => {
       historyId: userMessage.getHistoryId(),
       historyTimestamp: userMessage.getHistoryTimestamp(),
 
-      method: method.value as "KMP" | "BoyerMoore",
+      method: method.value as "KMP" | "BoyerMoore" | "GPT",
     };
 
     // Clear input
     userInput.value = "";
-    // Fetch response from backend
-    const response = await api.post(
-      "https://iridescent-jalebi-788066.netlify.app/.netlify/functions/endpoint/getmessage",
-      request
-    );
-    console.log(response.data.botResponse);
-
-    // Unload response from api
-    if (response.data.message === "200") {
-      botFullResponse.value = response.data.botResponse.response;
+    if (method.value !== "GPT") {
+      // Fetch response from backend
+      const response = await api.post(
+        "https://iridescent-jalebi-788066.netlify.app/.netlify/functions/endpoint/getmessage",
+        request
+      );
+      // Unload response from api
+      if (response.data.message === "200") {
+        botFullResponse.value = response.data.botResponse.response;
+      } else {
+        const confusedText = confusedResponse[random()];
+        const choiceArr = response.data.botResponse.response.split("<-|->");
+        botFullResponse.value = confusedText;
+        choiceArr.forEach((choice: string, index: number) => {
+          if (choice !== "") {
+            botFullResponse.value += index + 1 + ". " + choice + "\n";
+          }
+        });
+        botFullResponse.value +=
+          "Please rewrite the question if you desire to choose from the above!";
+        botFullResponse.value = botFullResponse.value.replace(/\n/g, "<br>");
+      }
     } else {
-      const confusedText = confusedResponse[random()];
-      const choiceArr = response.data.botResponse.response.split("<-|->");
-      botFullResponse.value = confusedText;
-      choiceArr.forEach((choice: string, index: number) => {
-        if (choice !== "") {
-          botFullResponse.value += index + 1 + ". " + choice + "\n";
+      const response = await api.post(
+        "https://tubes3stima.pythonanywhere.com/completion",
+        { request: request.text },
+        {
+          headers: { 'Content-Type': 'application/json' },
         }
-      });
-      botFullResponse.value +=
-        "Please rewrite the question if you desire to choose from the above!";
-      botFullResponse.value = botFullResponse.value.replace(/\n/g, "<br>");
+      );
+      if (response !== undefined) {
+        botFullResponse.value = response.data;
+      }
     }
 
     messages[messages.length - 1].setResponse(botFullResponse.value, 200);
@@ -270,6 +280,16 @@ onMounted(() => {
             :disable="isResponding"
             class="-tw-mt-10"
           />
+          <q-radio
+            v-model="method"
+            checked-icon="task_alt"
+            unchecked-icon="panorama_fish_eye"
+            color="accent"
+            val="GPT"
+            label="GPT"
+            :disable="isResponding"
+            class="-tw-mt-10"
+          />
         </div>
         <span
           class="text-sm-caption text-black tw-absolute tw-top-1 tw-right-2"
@@ -284,7 +304,7 @@ onMounted(() => {
           class="q-pa-md tw-h-screen"
           style="border-right: solid 2px #f46197"
         >
-          <div class="text-h4 q-mb-md text-accent">Chat History</div>
+          <div class="text-h4 q-mb-md text-accent tw-mt-2">Chat History</div>
           <q-scroll-area
             style="height: 70%"
             class="tw-pr-2"
@@ -346,6 +366,16 @@ onMounted(() => {
               color="accent"
               val="BoyerMoore"
               label="Boyer Moore"
+              :disable="isResponding"
+            />
+            <q-radio
+              dark
+              v-model="method"
+              checked-icon="task_alt"
+              unchecked-icon="panorama_fish_eye"
+              color="accent"
+              val="GPT"
+              label="GPT"
               :disable="isResponding"
             />
           </div>

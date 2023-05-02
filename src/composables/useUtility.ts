@@ -1,4 +1,6 @@
 import { Ref, WritableComputedRef } from "vue";
+import { Configuration, OpenAIApi } from "openai";
+
 export const useUtility = ({
   startNum,
   endNum,
@@ -10,7 +12,6 @@ export const useUtility = ({
   botMessage?: Ref<string> | WritableComputedRef<string>;
   duration?: number;
 } = {}) => {
-  console.log(`startNum: ${startNum}, endNum: ${endNum}`);
   /**
    * Wait for duration in millis
    */
@@ -25,11 +26,11 @@ export const useUtility = ({
       while (i <= botFullMessage.length) {
         let char1 = botFullMessage.charAt(i);
         let char2 = botFullMessage.charAt(i + 1);
-        if (char1 === '\n') {
-          char1 = '<br>';
+        if (char1 === "\n") {
+          char1 = "<br>";
         }
-        if (char2 === '\n') {
-          char2 = '<br>';
+        if (char2 === "\n") {
+          char2 = "<br>";
         }
         botMessage.value += char1 + char2;
         i = i + 2;
@@ -68,6 +69,22 @@ export const useUtility = ({
     const formattedDate = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
     return formattedDate;
   };
+
+  // const configuration = new Configuration({
+  //   organization: process.env.OPENAI_ORGANIZATION,
+  //   apiKey: process.env.OPENAI_API_KEY,
+  // });
+  // const openai = new OpenAIApi(configuration);
+  // delete configuration.baseOptions.headers["User-Agent"];
+  // const generateAIAnswer = async (prompt: string) => {
+  //   const completion = await openai.createCompletion({
+  //     model: "text-davinci-003",
+  //     prompt: prompt,
+  //     temperature: 0,
+  //     max_tokens: 67,
+  //   });
+  //   return completion.data.choices[0].text;
+  // };
 
   return {
     animateMessage,
