@@ -79,7 +79,7 @@ func FilterMessage(req *structs.Request, stat *string, db *sql.DB) {
 func GetResponse(req *structs.Request, index int, stat *string, db *sql.DB) {
 	// Fitur Tambah Pertanyaan
 	if index == 1 {
-		// Get only pertanyaan and jawaban from string
+		// Get only question and answer from string
 		result := GetPertanyaanJawaban(req.Text)
 
 		question := result[0]
@@ -99,7 +99,7 @@ func GetResponse(req *structs.Request, index int, stat *string, db *sql.DB) {
 		}
 
 	} else if index == 2 { // Fitur Hapus Pertanyaan
-		// Get only pertanyaan from string
+		// Get only question from string
 		question := GetPertanyaan(req.Text)
 
 		// Delete question from table
