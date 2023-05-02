@@ -1,7 +1,6 @@
 package main
 
 import (
-	"TUBES3_13521102/netlify/functions/FeatureCalculator"
 	"TUBES3_13521102/netlify/functions/controller"
 	"TUBES3_13521102/netlify/functions/database"
 	"database/sql"
@@ -11,6 +10,8 @@ import (
 	"regexp"
 
 	"github.com/aws/aws-lambda-go/events"
+	"github.com/aws/aws-lambda-go/lambda"
+
 	// "github.com/aws/aws-lambda-go/lambda"
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -122,9 +123,9 @@ func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResp
 
 func main() {
 	// Make the handler available for Remote Procedure Call
-	// lambda.Start(handler)
+	lambda.Start(handler)
 
-	expression := "2 2 + 3"
+	// expression := "1/8"
 
-	fmt.Println(FeatureCalculator.CalculateExpression(expression))
+	// fmt.Println(FeatureCalculator.CalculateExpression(expression))
 }
