@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+  "math"
 )
 
 
@@ -13,6 +14,8 @@ func Precedence(op string) int {
     return 1
   } else if (op == "*" || op == "/") {
     return 2
+  } else if (op == "^") {
+    return 3
   }
   return 0
 }
@@ -20,7 +23,7 @@ func Precedence(op string) int {
 // Get all the number in the string
 func GetNumber(expression string) []string {
   number := strings.FieldsFunc(expression, func(c rune) bool {
-    return c == '-' || c == '+' || c == ' ' || c == '/' || c == '*' || c == '(' || c == ')'
+    return c == '-' || c == '+' || c == ' ' || c == '/' || c == '*' || c == '(' || c == ')' || c == '^'
   })
   return number
 }
@@ -43,6 +46,11 @@ func applyOp(a float64, b float64, op string) (string, error) {
       return "", fmt.Errorf("division by zero")
     }
     return strconv.FormatFloat(a / b, 'f', 2, 64), nil
+  case "^":
+    if (a == 0) {
+      return "", fmt.Errorf("Zero cannot be powered")
+    }
+    return strconv.FormatFloat(math.Pow(a, b), 'f', 2, 64), nil
   default:
     return "", fmt.Errorf("invalid operator")
   }
