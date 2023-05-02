@@ -63,7 +63,7 @@ func StringMatching(req *structs.Request, db *sql.DB, questions []structs.BotRes
 		for _, question := range questions {
 			dbq := strings.ToLower(question.Question)
 			text := strings.ToLower(req.Text)
-			if FeatureStringmatching.BmMatch(dbq, text) == -2 {
+			if FeatureStringmatching.KMP(dbq, text) == -2 { // Found Exact Match
 				req.Response = question.Answer
 				return true
 			}
@@ -72,7 +72,7 @@ func StringMatching(req *structs.Request, db *sql.DB, questions []structs.BotRes
 		for _, question := range questions {
 			dbq := strings.ToLower(question.Question)
 			text := strings.ToLower(req.Text)
-			if FeatureStringmatching.KMP(dbq, text) == -2 {
+			if FeatureStringmatching.BmMatch(dbq, text) == -2 { // Found Exact Match
 				req.Response = question.Answer
 				return true
 			}
@@ -143,11 +143,10 @@ func GetResponse(req *structs.Request, index int, stat *string, db *sql.DB) {
 		}
 		//
 		if StringMatching(req, db, questions) {
-			return
+			return // terminate because match answer has been found
 		}
 
 		// No match found
-		*stat = "404"
 		qList := []struct {
 			i float64
 			s string
@@ -167,17 +166,39 @@ func GetResponse(req *structs.Request, index int, stat *string, db *sql.DB) {
 		sort.Slice(qList, func(i, j int) bool {
 			return qList[i].i > qList[j].i
 		})
-		req.Response = "Pertanyaan tidak ditemukan di database.\nApakah maksud anda:\n"
-		if len(qList) > 3 {
-			for i := 0; i < 3; i++ {
-				req.Response = req.Response + qList[i].s + "\n"
+		if len(qList) != 0 {
+			if qList[0].i > 0.9 {
+				req.Response = qList[0].s
+				return
+			} else {
+				var x int
+				for i := 0; i < len(qList); {
+					if qList[i].i > 0.5 {
+						x++
+					}
+				}
+				if x != 0 {
+					*stat = "404"
+					req.Response = "Pertanyaan tidak ditemukan di database.\nApakah maksud anda:\n"
+				} else {
+					req.Response = "Tidak ada pertanyaan tersebut dalam database"
+					return
+				}
+
+				if x > 3 {
+					for i := 0; i < 3; i++ {
+						req.Response = req.Response + qList[i].s + "\n"
+					}
+				} else {
+					for i := 0; i < x; i++ {
+						req.Response = req.Response + qList[i].s + "\n"
+					}
+				}
 			}
 		} else {
-			for i := 0; i < len(qList); i++ {
-				req.Response = req.Response + qList[i].s + "\n"
-			}
+			req.Response = "Tidak ada pertanyaan tersebut dalam database"
+			return
 		}
-		return
 	}
 	// Adding user message to the database
 

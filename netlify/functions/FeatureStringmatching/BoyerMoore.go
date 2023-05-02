@@ -22,7 +22,7 @@ func BmMatch(text, pattern string) int {
 	for i <= n-1 {
 		if pattern[j] == text[i] {
 			if j == 0 { // Match found
-				if i == 0 && n == m {
+				if n == m {
 					return -2 // EXACT MATCH
 				} else {
 					return i
