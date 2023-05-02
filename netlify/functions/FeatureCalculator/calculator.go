@@ -229,5 +229,8 @@ func CalculateExpression(expression string) (string, error) {
     }
     valueStack.Push(hasil)
   }
-  return valueStack.Peek()
+  if (valueStack.Size() == 1) {
+    return valueStack.Peek()
+  }
+  return "Invalid syntax", nil
 }

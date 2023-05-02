@@ -124,7 +124,7 @@ func main() {
 	// Make the handler available for Remote Procedure Call
 	// lambda.Start(handler)
 
-	expression := "1/8"
+	expression := "2 2 + 3"
 
 	fmt.Println(FeatureCalculator.CalculateExpression(expression))
 }
