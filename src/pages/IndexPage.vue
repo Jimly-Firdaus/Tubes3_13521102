@@ -44,9 +44,11 @@ const messages: MessageInterface[] = reactive([]);
 
 const fetchHistories = async () => {
   $q.loading.show({
-    message: 'Fetching important resouces. Hang on...'
+    message: "Fetching important resouces. Hang on...",
   });
-  const response = await api.get("https://iridescent-jalebi-788066.netlify.app/.netlify/functions/endpoint/history");
+  const response = await api.get(
+    "https://iridescent-jalebi-788066.netlify.app/.netlify/functions/endpoint/history"
+  );
   const fetchedMessageHistory: [] = response.data.historyMessage.messageHistory;
   fetchedMessageHistory.forEach((ele: History, index) => {
     // console.log(ele);
@@ -58,18 +60,18 @@ const fetchHistories = async () => {
         messageJSON.text,
         messageJSON.sentTime,
         messageJSON.historyId
-      )
+      );
       message.setResponse(messageJSON.response, 200);
       message.setResponseStatus(true);
       arrayOfConversation.push(message);
-    })
+    });
     const history: History = {
       historyId: ele.historyId,
       topic: ele.topic,
-      conversation: arrayOfConversation
+      conversation: arrayOfConversation,
     };
     chatHistories.messageHistory.push(history);
-  })
+  });
   $q.loading.hide();
 };
 
@@ -135,7 +137,6 @@ const sendMessage = async () => {
 
     // Send request to backend
     const request: Request = {
-
       id: userMessage.getId(),
       text: userMessage.getText(),
       response: "",
@@ -143,14 +144,16 @@ const sendMessage = async () => {
       historyId: userMessage.getHistoryId(),
       historyTimestamp: userMessage.getHistoryTimestamp(),
 
-
       method: method.value as "KMP" | "BoyerMoore",
     };
 
     // Clear input
     userInput.value = "";
     // Fetch response from backend
-    const response = await api.post("https://iridescent-jalebi-788066.netlify.app/.netlify/functions/endpoint/getmessage", request);
+    const response = await api.post(
+      "https://iridescent-jalebi-788066.netlify.app/.netlify/functions/endpoint/getmessage",
+      request
+    );
     console.log(response.data.botResponse);
 
     // Unload response from api
@@ -162,13 +165,14 @@ const sendMessage = async () => {
       botFullResponse.value = confusedText;
       choiceArr.forEach((choice: string, index: number) => {
         if (choice !== "") {
-          botFullResponse.value += (index + 1) + ". " + choice + "\n";
+          botFullResponse.value += index + 1 + ". " + choice + "\n";
         }
-      })
-      botFullResponse.value += "Please rewrite the question if you desire to choose from the above!";
-      botFullResponse.value = botFullResponse.value.replace(/\n/g, '<br>');
+      });
+      botFullResponse.value +=
+        "Please rewrite the question if you desire to choose from the above!";
+      botFullResponse.value = botFullResponse.value.replace(/\n/g, "<br>");
     }
-    
+
     messages[messages.length - 1].setResponse(botFullResponse.value, 200);
     await animateMessage(botFullResponse.value);
     messages[messages.length - 1].setResponseStatus(true);
@@ -205,7 +209,7 @@ onMounted(() => {
         <div class="text-h4 q-mb-md text-accent">Chat History</div>
         <q-scroll-area
           style="height: 70%"
-          class="tw-pr-2"
+          class=""
           :vertical-thumb-style="{ width: '5px' }"
         >
           <q-btn
@@ -267,7 +271,9 @@ onMounted(() => {
             class="-tw-mt-10"
           />
         </div>
-        <span class="text-sm-caption text-black tw-absolute tw-bottom-2">
+        <span
+          class="text-sm-caption text-black tw-absolute tw-top-1 tw-right-2"
+        >
           Copyright by 666
         </span>
       </div>
@@ -343,13 +349,16 @@ onMounted(() => {
               :disable="isResponding"
             />
           </div>
-          <span class="text-caption text-white tw-absolute tw-bottom-2">
+          <span class="text-caption text-white tw-absolute tw-top-0 tw-right-4">
             Copyright by 666
           </span>
         </div>
       </template>
 
       <template v-slot:after>
+        <template v-if="method === 'GPT'">
+          <h6 class="tw-absolute tw-right-2 text-warning">Please note that GPT Mode will not be saved to our database!</h6>
+        </template>
         <div
           style="width: 100%"
           class="tw-h-screen tw-w-flex tw-flex-col tw-justify-end"
