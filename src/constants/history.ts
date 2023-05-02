@@ -87,3 +87,12 @@ export const greetings = [
   "Hello there! How can I be of service today?",
   "Hi! What can I do for you today?",
 ]
+
+export const helpfulResponse = [
+  "Was this information helpful to you?",
+  "Did I provide the information you were looking for?",
+  "Is there anything else I can help you with?",
+  "I hope that information was helpful. Is there anything else you need?", 
+  "Did my response answer your question?",
+  "I’m here to help. Was that information useful to you?",
+]
