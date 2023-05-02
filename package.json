@@ -15,7 +15,10 @@
   "dependencies": {
     "@quasar/extras": "^1.0.0",
     "axios": "^1.2.1",
+    "dotenv": "^16.0.3",
+    "openai": "^3.2.1",
     "quasar": "^2.6.0",
+    "vite-plugin-require": "^1.1.10",
     "vue": "^3.0.0",
     "vue-router": "^4.0.0"
   },

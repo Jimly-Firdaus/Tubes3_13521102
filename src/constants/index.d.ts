@@ -47,7 +47,7 @@ export interface Request {
   sentTime: string;
   historyId: number;
   historyTimestamp: string;
-  method: 'KMP' | 'BoyerMoore';
+  method: 'KMP' | 'BoyerMoore' | 'GPT';
 }
 
 // Future use --ignore this
