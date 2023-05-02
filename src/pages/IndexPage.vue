@@ -18,7 +18,7 @@ const $q = useQuasar();
 const BREAKPOINT = 1024;
 const isSmallScreen = computed(() => $q.screen.width < BREAKPOINT);
 
-const splitter = computed(() => (isSmallScreen.value ? 0 : 20));
+const splitter = computed(() => (isSmallScreen.value ? 0 : 30));
 const drawer = ref(false);
 const scrollArea = ref<QScrollArea | null>(null);
 const scrollToBottom = () => {
@@ -51,7 +51,6 @@ const fetchHistories = async () => {
   );
   const fetchedMessageHistory: [] = response.data.historyMessage.messageHistory;
   fetchedMessageHistory.forEach((ele: History, index) => {
-    // console.log(ele);
     const arrayOfConversation: Array<MessageInterface> = [];
     ele.conversation.forEach((messageJSON, index) => {
       const message = new Message(
@@ -92,7 +91,6 @@ const botGreetings = ref(greetings[random()]);
 const method = ref("KMP");
 
 const newChat = () => {
-  console.log(random());
   botGreetings.value = greetings[random()];
   currentConversationID.value = chatHistories.messageHistory.length + 1;
   messages.splice(0, messages.length);
@@ -156,7 +154,6 @@ const sendMessage = async () => {
         "https://iridescent-jalebi-788066.netlify.app/.netlify/functions/endpoint/getmessage",
         request
       );
-      console.log(response.data.botResponse);
       // Unload response from api
       if (response.data.message === "200") {
         botFullResponse.value = response.data.botResponse.response;
@@ -174,9 +171,15 @@ const sendMessage = async () => {
         botFullResponse.value = botFullResponse.value.replace(/\n/g, "<br>");
       }
     } else {
-      const response = await generateAIAnswer(request.text);
+      const response = await api.post(
+        "https://tubes3stima.pythonanywhere.com/completion",
+        { request: request.text },
+        {
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
       if (response !== undefined) {
-        botFullResponse.value = response;
+        botFullResponse.value = response.data;
       }
     }
 
@@ -299,7 +302,7 @@ onMounted(() => {
           class="q-pa-md tw-h-screen"
           style="border-right: solid 2px #f46197"
         >
-          <div class="text-h4 q-mb-md text-accent">Chat History</div>
+          <div class="text-h4 q-mb-md text-accent tw-mt-2">Chat History</div>
           <q-scroll-area
             style="height: 70%"
             class="tw-pr-2"
@@ -374,7 +377,7 @@ onMounted(() => {
               :disable="isResponding"
             />
           </div>
-          <span class="text-caption text-white tw-absolute tw-bottom-2">
+          <span class="text-caption text-white tw-absolute tw-top-0">
             Copyright by 666
           </span>
         </div>
