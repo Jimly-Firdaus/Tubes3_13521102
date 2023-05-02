@@ -5,35 +5,11 @@ import (
 	"database/sql"
 )
 
-func InsertUserMessage(db *sql.DB, newMessage structs.Message) (error) {
+func InsertUserMessage(db *sql.DB, newMessage structs.Request) (error) {
   err := db.QueryRow("INSERT INTO UserMessage(userQuestion, botAnswer, sentTime) VALUES(?, ?, ?)", newMessage.Text, newMessage.Response, newMessage.SentTime)
 
   if err != nil {
     return err.Err()
-  }
-
-  // Checking if History table already made for current message
-  res, errs := db.Query("SELECT * FROM History WHERE historyID = ?", newMessage.HistoryId)
-
-  if errs != nil {
-    panic(errs)
-  }
-
-  defer res.Close()
-
-  count := 0
-
-  for res.Next() {
-    count++
-  }
-
-  if count == 0 {
-    var history = structs.History{}
-
-    history.HistoryID = newMessage.HistoryId
-    history.Topic = newMessage.Text
-
-    InsertHistory(db, history, newMessage.HistoryTimeStamp)
   }
 
   // Add to HistoryMessage table

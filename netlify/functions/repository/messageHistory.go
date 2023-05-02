@@ -6,7 +6,7 @@ import (
 )
 
 func GetAllHistoryMessage(db *sql.DB) (results structs.MessageHistory, err error) {
-  rows, err := db.Query("SELECT historyID FROM History")
+  rows, err := db.Query("SELECT historyID FROM History ORDER BY createTime DESC")
 
   if err != nil {
     panic(err)

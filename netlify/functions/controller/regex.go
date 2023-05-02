@@ -43,6 +43,7 @@ func FilterDate(date string) string {
 	// Replacing unnecessary string value with null
 	substr := "Hari apa "
 	newStr := strings.Replace(date, substr, "", 1)
+	newStr = strings.Replace(newStr, "?", "", 1)
 
 	return newStr
 }
@@ -173,5 +174,48 @@ func GetResponse(req *structs.Request, index int, stat *string, db *sql.DB) {
 		return
 	} else {
 		return
+	}
+
+	// Adding user message to the database
+
+	// First we check if the historyID is already in database or not
+	
+	if (repository.CheckHistoryExist(db, int(req.HistoryId))) {
+		// If history already exist then we only need to add to table UserMessage and HistoryMessage
+		err := repository.InsertUserMessage(db, *req)
+
+		if err != nil {
+			panic(err)
+		}
+	} else {
+		// IF history doesn't exist yet we check how many rows there are now in History table
+		if (repository.CountHistory(db) >= 10) {
+			// We delete the oldest history from table
+			oldestID := repository.GetOldestHistoryID(db)
+
+			err := repository.DeleteHistory(db, oldestID)
+
+			if err != nil {
+				panic(err)
+			}
+		}
+
+		// If there is space to insert row then insert row to history table
+		var newHistory = structs.History{}
+		newHistory.HistoryID = req.HistoryId
+		newHistory.Topic = req.Text
+		err := repository.InsertHistory(db, newHistory, req.HistoryTimeStamp)
+
+		if err != nil {
+			panic(err)
+		}
+
+		// Also don't forget to insert row to userMessage table
+
+		err = repository.InsertUserMessage(db, *req)
+
+		if err != nil {
+			panic(err)
+		}
 	}
 }

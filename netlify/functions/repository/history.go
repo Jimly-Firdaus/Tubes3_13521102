@@ -21,15 +21,15 @@ func InsertHistory(db *sql.DB, history structs.History, datetime string) (error)
 }
 
 
-func DeleteHistory(db *sql.DB, history structs.History) (error) {
+func DeleteHistory(db *sql.DB, historyID int) (error) {
   // Deleting from foreign key table first
-  _, errs := db.Exec("DELETE FROM HistoryMessage WHERE historyID = ?", history.HistoryID)
+  _, errs := db.Exec("DELETE FROM HistoryMessage WHERE historyID = ?", historyID)
 
   if errs != nil {
     panic(errs)
   }
 
-  res, errs := db.Exec("DELETE FROM History WHERE historyID = ?", history.HistoryID)
+  res, errs := db.Exec("DELETE FROM History WHERE historyID = ?", historyID)
   n, _ := res.RowsAffected()
 
   if errs != nil {
@@ -107,3 +107,58 @@ func GetHistoryByHistoryID(db *sql.DB, historyID int64) (results structs.History
   return
 }
 
+func GetOldestHistoryID(db *sql.DB) int {
+  rows, err := db.Query("SELECT historyID FROM History ORDER BY createTime ASC LIMIT 1")
+
+  if err != nil {
+    panic(err)
+  }
+
+  defer rows.Close()
+
+  var id int
+
+  for rows.Next() {
+
+    rows.Scan(&id)
+  }
+
+  return id
+}
+
+
+func CheckHistoryExist(db *sql.DB, historyID int) bool {
+  rows, err := db.Query("SELECT * FROM History WHERE historyID = ?", historyID)
+
+  if err != nil {
+    panic(err)
+  }
+
+  defer rows.Close()
+
+  var count = 0
+
+  for rows.Next() {
+    count++
+  }
+
+  return count != 0
+}
+
+func CountHistory(db *sql.DB) int {
+  rows, err := db.Query("SELECT * FROM History")
+
+  if err != nil {
+    panic(err)
+  }
+
+  defer rows.Close()
+
+  var count = 0
+
+  for rows.Next() {
+    count++
+  }
+
+  return count
+}
