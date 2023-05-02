@@ -58,7 +58,28 @@ func FilterMessage(req *structs.Request, stat *string, db *sql.DB, regex []*rege
 		}
 	}
 }
-
+func StringMatching(req *structs.Request, db *sql.DB, questions []structs.BotResponse) bool {
+	if req.Method == "KMP" {
+		for _, question := range questions {
+			dbq := strings.ToLower(question.Question)
+			text := strings.ToLower(req.Text)
+			if FeatureStringmatching.BmMatch(dbq, text) == -2 {
+				req.Response = question.Answer
+				return true
+			}
+		}
+	} else if req.Method == "BoyerMoore" {
+		for _, question := range questions {
+			dbq := strings.ToLower(question.Question)
+			text := strings.ToLower(req.Text)
+			if FeatureStringmatching.KMP(dbq, text) == -2 {
+				req.Response = question.Answer
+				return true
+			}
+		}
+	}
+	return false
+}
 func GetResponse(req *structs.Request, index int, stat *string, db *sql.DB) {
 	// Fitur Tambah Pertanyaan
 	if index == 1 {
@@ -120,26 +141,11 @@ func GetResponse(req *structs.Request, index int, stat *string, db *sql.DB) {
 		if err != nil {
 			panic(err)
 		}
-		if req.Method != "KMP" {
-			for _, question := range questions {
-				dbq := strings.ToLower(question.Question)
-				text := strings.ToLower(req.Text)
-				if FeatureStringmatching.BmMatch(dbq, text) != -1 {
-					req.Response = question.Answer
-					return
-				}
-			}
-
-		} else if req.Method == "BoyerMoore" { // Boyer-Moore
-			for _, question := range questions {
-				dbq := strings.ToLower(question.Question)
-				text := strings.ToLower(req.Text)
-				if FeatureStringmatching.KMP(dbq, text) != -1 {
-					req.Response = question.Answer
-					return
-				}
-			}
+		//
+		if StringMatching(req, db, questions) {
+			return
 		}
+
 		// No match found
 		*stat = "404"
 		qList := []struct {
@@ -158,29 +164,26 @@ func GetResponse(req *structs.Request, index int, stat *string, db *sql.DB) {
 			})
 		}
 		// Sort Descending by Percentage value
-		req.Response = ""
 		sort.Slice(qList, func(i, j int) bool {
 			return qList[i].i > qList[j].i
 		})
+		req.Response = "Pertanyaan tidak ditemukan di database.\nApakah maksud anda:\n"
 		if len(qList) > 3 {
 			for i := 0; i < 3; i++ {
-				req.Response = req.Response + qList[i].s + "<-|->"
+				req.Response = req.Response + qList[i].s + "\n"
 			}
 		} else {
 			for i := 0; i < len(qList); i++ {
-				req.Response = req.Response + qList[i].s + "<-|->"
+				req.Response = req.Response + qList[i].s + "\n"
 			}
 		}
 		return
-	} else {
-		return
 	}
-
 	// Adding user message to the database
 
 	// First we check if the historyID is already in database or not
-	
-	if (repository.CheckHistoryExist(db, int(req.HistoryId))) {
+
+	if repository.CheckHistoryExist(db, int(req.HistoryId)) {
 		// If history already exist then we only need to add to table UserMessage and HistoryMessage
 		err := repository.InsertUserMessage(db, *req)
 
@@ -189,7 +192,7 @@ func GetResponse(req *structs.Request, index int, stat *string, db *sql.DB) {
 		}
 	} else {
 		// IF history doesn't exist yet we check how many rows there are now in History table
-		if (repository.CountHistory(db) >= 10) {
+		if repository.CountHistory(db) >= 10 {
 			// We delete the oldest history from table
 			oldestID := repository.GetOldestHistoryID(db)
 

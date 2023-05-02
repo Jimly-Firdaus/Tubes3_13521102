@@ -21,13 +21,17 @@ func BmMatch(text, pattern string) int {
 	j := m - 1
 	for i <= n-1 {
 		if pattern[j] == text[i] {
-			if j == 0 {
-				return i
-			} else { // Option 1
+			if j == 0 { // Match found
+				if i == 0 && n == m {
+					return -2 // EXACT MATCH
+				} else {
+					return i
+				}
+			} else {
 				i--
 				j--
 			}
-		} else { // Option 2
+		} else {
 			lo := last[text[i]]
 			i += m - Min(j, 1+lo)
 			j = m - 1
@@ -42,6 +46,7 @@ func Min(a, b int) int {
 	}
 	return b
 }
+
 // tester
 // func main() {
 // 	var text, pattern string

@@ -17,7 +17,7 @@ import (
 
 func InsertUserMessage(c *gin.Context) {
 	var (
-		msg structs.Message
+		msg structs.Request
 		err error
 	)
 

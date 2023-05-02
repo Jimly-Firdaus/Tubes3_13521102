@@ -38,18 +38,19 @@ func KMP(str string, substr string) int {
 	i, j := 0, 0
 	for i < len_str {
 		if substr[j] == str[i] {
-			if j == len_sub-1 {
-				return (i - len_sub + 1) // Match found
+			if j == len_sub-1 { // Match found
+				if len_str == len_sub {
+					return -2 // EXACT MATCH
+				} else {
+					return (i - len_sub + 1)
+				}
 			}
 			i++
 			j++
-		} else if j == 0 {
-			i++
-		} else {
+		} else if j > 0 {
 			j = table[j-1]
-		}
-		if len_sub == j {
-			return 1
+		} else {
+			i++
 		}
 	}
 	return -1
