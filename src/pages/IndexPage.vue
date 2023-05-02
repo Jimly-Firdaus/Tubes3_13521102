@@ -79,7 +79,7 @@ const botResponse: Ref<string> = ref("");
 const botFullResponse: Ref<string> = ref("");
 const isResponding: Ref<boolean> = ref(false);
 
-const { animateMessage, random, generateTimestamp, generateAIAnswer } =
+const { animateMessage, random, generateTimestamp } =
   useUtility({
     startNum: 0,
     endNum: 5,
