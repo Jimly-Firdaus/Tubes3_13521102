@@ -17,13 +17,13 @@ func GetPertanyaanJawaban(req string) []string {
 	// Replacing unnecessary string value with null
 	substr1 := "Tambahkan pertanyaan "
 	substr2 := "dengan jawaban "
-	newStr := strings.Replace(req, substr1, "", 1) 
+	newStr := strings.Replace(req, substr1, "", 1)
 	newStr = strings.Replace(newStr, substr2, "", 1)
 
-	result := strings.FieldsFunc(newStr, 
-	func (c rune) bool {
-		return c == ' '
-	})
+	result := strings.FieldsFunc(newStr,
+		func(c rune) bool {
+			return c == ' '
+		})
 
 	return result
 }
@@ -47,34 +47,16 @@ func FilterDate(date string) string {
 	return newStr
 }
 
-func FilterMessage(req *structs.Request, stat *string, db *sql.DB) {
-	// Define multiple regex patterns
-	patterns := []string{
-		`^(?i)Tambahkan pertanyaan (.*) dengan jawaban (.*)$`, // Tambah pertanyaan
-		`^(?i)Hapus pertanyaan (.*)$`,                         // Hapus pertanyaan
-		`(?i)^(Hari apa )?[0-9]{2}/[0-9]{2}/[0-9]{4}\??$`,     // Kalendar
-		`^[\d()+\-*\/. ]+$`,                                   // Kalkulator
-		`.*`,                                                  // Pertanyaan Teks
-	}
-	// Compile the patterns into regex objects
-	regexes := make([]*regexp.Regexp, len(patterns))
-	for i, pattern := range patterns {
-		regex, err := regexp.Compile(pattern)
-		if err != nil {
-			panic(err)
-		}
-		regexes[i] = regex
-	}
+func FilterMessage(req *structs.Request, stat *string, db *sql.DB, regex []*regexp.Regexp) {
 	// Filtering required feature for message.
-	for i, regex := range regexes {
-		if regex.MatchString(req.Text) {
+	for i, reg := range regex {
+		if reg.MatchString(req.Text) {
 			// fmt.Printf("String '%s' matches pattern %d\n", text, i+1)
 			GetResponse(req, i+1, stat, db)
 			return
 		}
 	}
 }
-
 
 func GetResponse(req *structs.Request, index int, stat *string, db *sql.DB) {
 	// Fitur Tambah Pertanyaan
@@ -86,7 +68,7 @@ func GetResponse(req *structs.Request, index int, stat *string, db *sql.DB) {
 		answer := result[1]
 
 		// Checking if question already exist in the table or not
-		if (repository.CheckQuestionExist(db, question)) {
+		if repository.CheckQuestionExist(db, question) {
 			repository.UpdateBotResponse(db, question, answer)
 
 			// Set bot response
@@ -111,11 +93,11 @@ func GetResponse(req *structs.Request, index int, stat *string, db *sql.DB) {
 		} else {
 			req.Response = "Pertanyaan " + question + " telah dihapus"
 		}
-		
+
 	} else if index == 3 { // Fitur Kalendar
 		// Split unnecessary string value
 		date := FilterDate(req.Text)
-		
+
 		// Set bot response
 		req.Response = FeatureDate.FindDayName(date)
 
@@ -130,7 +112,7 @@ func GetResponse(req *structs.Request, index int, stat *string, db *sql.DB) {
 
 		// Set bot response
 		req.Response = result
-		
+
 	} else if index == 5 { // Fitur Pertanyaan Teks
 		var questions []structs.BotResponse
 		questions, err := repository.GetAllBotResponse(db)

@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"regexp"
 	"strconv"
 
 	"github.com/aws/aws-lambda-go/events"
@@ -79,7 +80,7 @@ func GetUserMessageByID(c *gin.Context) {
 		"userMessage": userMessage,
 	})
 }
-func ParseUserMessage(request events.APIGatewayProxyRequest, db *sql.DB) (*events.APIGatewayProxyResponse, error) {
+func ParseUserMessage(request events.APIGatewayProxyRequest, db *sql.DB, regex []*regexp.Regexp) (*events.APIGatewayProxyResponse, error) {
 	// Parse the request body into a Request struct
 	var req structs.Request
 	var status string
@@ -99,7 +100,7 @@ func ParseUserMessage(request events.APIGatewayProxyRequest, db *sql.DB) (*event
 	fmt.Println(req.HistoryTimeStamp)
 	fmt.Println(req.Method)
 	status = "200"
-	FilterMessage(&req, &status, db)
+	FilterMessage(&req, &status, db, regex)
 	// Parameter jadi struct.
 	// TO DO : Masukin database
 	// Write a response back to the client

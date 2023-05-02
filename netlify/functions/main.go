@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"regexp"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
@@ -23,10 +24,28 @@ const (
 )
 
 var (
-	db *sql.DB
+	db      *sql.DB
+	regexes []*regexp.Regexp
 )
 
 func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResponse, error) {
+	patterns := []string{
+		`^(?i)Tambahkan pertanyaan (.*) dengan jawaban (.*)$`, // Tambah pertanyaan
+		`^(?i)Hapus pertanyaan (.*)$`,                         // Hapus pertanyaan
+		`(?i)^(Hari apa )?[0-9]{2}/[0-9]{2}/[0-9]{4}\??$`,     // Kalendar
+		`^[\d()+\-*\/. ]+$`,                                   // Kalkulator
+		`.*`,                                                  // Pertanyaan Teks
+	}
+	// Compile the patterns into regex objects
+	regexes := make([]*regexp.Regexp, len(patterns))
+	for i, pattern := range patterns {
+		regex, err := regexp.Compile(pattern)
+		if err != nil {
+			panic(err)
+		}
+		regexes[i] = regex
+	}
+
 	db, err := sql.Open("mysql", database.ConnectDatabase(username, password, host, port, databasetype))
 	if err != nil {
 		fmt.Printf("Error %s while opening database\n", err)
@@ -68,7 +87,7 @@ func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResp
 		// }
 	case http.MethodPost:
 		if request.Path == "/.netlify/functions/endpoint/getmessage" {
-			return controller.ParseUserMessage(request, db)
+			return controller.ParseUserMessage(request, db, regexes)
 		}
 	case http.MethodOptions:
 		if request.Path == "/.netlify/functions/endpoint/getmessage" {
