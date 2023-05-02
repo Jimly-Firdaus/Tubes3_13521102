@@ -1,9 +1,9 @@
 package main
 
 import (
+	"TUBES3_13521102/netlify/functions/FeatureCalculator"
 	"TUBES3_13521102/netlify/functions/controller"
 	"TUBES3_13521102/netlify/functions/database"
-	"TUBES3_13521102/netlify/functions/FeatureCalculator"
 	"database/sql"
 	"fmt"
 	"log"
@@ -34,7 +34,7 @@ func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResp
 		`^(?i)Tambahkan pertanyaan (.*) dengan jawaban (.*)$`, // Tambah pertanyaan
 		`^(?i)Hapus pertanyaan (.*)$`,                         // Hapus pertanyaan
 		`(?i)^(Hari apa )?[0-9]{2}/[0-9]{2}/[0-9]{4}\??$`,     // Kalendar
-		`^[\d()+\-*\/. ]+$`,                                   // Kalkulator
+		`^[\d()+\-*\/.^ ]+$`,                                  // Kalkulator
 		`.*`,                                                  // Pertanyaan Teks
 	}
 	// Compile the patterns into regex objects
