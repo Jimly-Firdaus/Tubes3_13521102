@@ -70,12 +70,7 @@ module.exports = configure(function (/* ctx */) {
       // publicPath: '/',
       // analyze: true,
       // env: {},
-      env: {
-        ...require("dotenv").config().parsed,
-        ENV: process.env.ENV,
-        OPENAI_API_KEY: process.env.OPENAI_API_KEY,
-        OPENAI_ORGANIZATION: process.env.OPENAI_ORGANIZATION,
-      }
+      env: require("dotenv").config().parsed,
       // rawDefine: {}
       // ignorePublicFolder: true,
       // minify: false,
@@ -86,9 +81,7 @@ module.exports = configure(function (/* ctx */) {
       // viteVuePluginOptions: {},
 
       
-      // vitePlugins: [
-      //   [ 'package-name', { ..options.. } ]
-      // ]
+      vitePlugins: [["vite-plugin-require", {}]],
     },
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#devServer
