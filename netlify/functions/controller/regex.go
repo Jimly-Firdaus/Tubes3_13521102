@@ -1,6 +1,8 @@
 package controller
 
 import (
+	"TUBES3_13521102/netlify/functions/FeatureCalculator"
+	"TUBES3_13521102/netlify/functions/FeatureDate"
 	"TUBES3_13521102/netlify/functions/FeatureStringmatching"
 	"TUBES3_13521102/netlify/functions/repository"
 	"TUBES3_13521102/netlify/functions/structs"
@@ -9,6 +11,41 @@ import (
 	"sort"
 	"strings"
 )
+
+// Function to get only pertanyaan and jawaban from string
+func GetPertanyaanJawaban(req string) []string {
+	// Replacing unnecessary string value with null
+	substr1 := "Tambahkan pertanyaan "
+	substr2 := "dengan jawaban "
+	newStr := strings.Replace(req, substr1, "", 1) 
+	newStr = strings.Replace(newStr, substr2, "", 1)
+
+	result := strings.FieldsFunc(newStr, 
+	func (c rune) bool {
+		return c == ' '
+	})
+
+	return result
+}
+
+// Function to get only pertanyaan from string
+func GetPertanyaan(req string) string {
+	// Replacing unnecessary string value with null
+	substr1 := "Hapus pertanyaan "
+
+	newStr := strings.Replace(req, substr1, "", 1)
+
+	return newStr
+}
+
+// Function to get only date from string
+func FilterDate(date string) string {
+	// Replacing unnecessary string value with null
+	substr := "Hari apa "
+	newStr := strings.Replace(date, substr, "", 1)
+
+	return newStr
+}
 
 func FilterMessage(req *structs.Request, stat *string, db *sql.DB) {
 	// Define multiple regex patterns
@@ -38,19 +75,62 @@ func FilterMessage(req *structs.Request, stat *string, db *sql.DB) {
 	}
 }
 
+
 func GetResponse(req *structs.Request, index int, stat *string, db *sql.DB) {
 	// Fitur Tambah Pertanyaan
 	if index == 1 {
-		// Split
-		return
+		// Get only pertanyaan and jawaban from string
+		result := GetPertanyaanJawaban(req.Text)
+
+		question := result[0]
+		answer := result[1]
+
+		// Checking if question already exist in the table or not
+		if (repository.CheckQuestionExist(db, question)) {
+			repository.UpdateBotResponse(db, question, answer)
+
+			// Set bot response
+			req.Response = "Pertanyaan " + question + " sudah ada! jawaban di update ke " + answer
+		} else {
+			repository.InsertBotResponse(db, question, answer)
+
+			// Set bot response
+			req.Response = "Pertanyaan " + question + " telah ditambah"
+		}
+
 	} else if index == 2 { // Fitur Hapus Pertanyaan
-		// Split
-		return
+		// Get only pertanyaan from string
+		question := GetPertanyaan(req.Text)
+
+		// Delete question from table
+		err := repository.DeleteBotResponse(db, question)
+
+		// Set bot response
+		if err != nil {
+			req.Response = "Tidak ada pertanyaan " + question + " pada database!"
+		} else {
+			req.Response = "Pertanyaan " + question + " telah dihapus"
+		}
+		
 	} else if index == 3 { // Fitur Kalendar
-		// Split ada
-		return
+		// Split unnecessary string value
+		date := FilterDate(req.Text)
+		
+		// Set bot response
+		req.Response = FeatureDate.FindDayName(date)
+
 	} else if index == 4 { //  Fitur Kalkulator
-		return
+
+		// Get expression result
+		result, err := FeatureCalculator.CalculateExpression(req.Text)
+
+		if err != nil {
+			panic(err)
+		}
+
+		// Set bot response
+		req.Response = result
+		
 	} else if index == 5 { // Fitur Pertanyaan Teks
 		var questions []structs.BotResponse
 		questions, err := repository.GetAllBotResponse(db)
