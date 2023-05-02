@@ -8,7 +8,11 @@ import {
 } from "src/constants";
 import { ref, Ref, watch, reactive, onMounted, computed } from "vue";
 import { QScrollArea, useQuasar } from "quasar";
-import { greetings, confusedResponse } from "src/constants/history";
+import {
+  greetings,
+  confusedResponse,
+  helpfulResponse,
+} from "src/constants/history";
 import { useUtility } from "src/composables/useUtility";
 import { useMessages } from "src/composables/useMessages";
 import { botAvatar, userAvatar } from "src/constants/avatar";
@@ -79,13 +83,12 @@ const botResponse: Ref<string> = ref("");
 const botFullResponse: Ref<string> = ref("");
 const isResponding: Ref<boolean> = ref(false);
 
-const { animateMessage, random, generateTimestamp } =
-  useUtility({
-    startNum: 0,
-    endNum: 5,
-    botMessage: botResponse,
-    duration: 20,
-  });
+const { animateMessage, random, generateTimestamp } = useUtility({
+  startNum: 0,
+  endNum: 5,
+  botMessage: botResponse,
+  duration: 20,
+});
 
 const botGreetings = ref(greetings[random()]);
 const method = ref("KMP");
@@ -156,26 +159,28 @@ const sendMessage = async () => {
       );
       // Unload response from api
       if (response.data.message === "200") {
-        botFullResponse.value = response.data.botResponse.response;
+        botFullResponse.value = response.data.botResponse.response + "\n\n";
+        botFullResponse.value += helpfulResponse[random()];
       } else {
-        const confusedText = confusedResponse[random()];
-        const choiceArr = response.data.botResponse.response.split("<-|->");
-        botFullResponse.value = confusedText;
-        choiceArr.forEach((choice: string, index: number) => {
-          if (choice !== "") {
-            botFullResponse.value += index + 1 + ". " + choice + "\n";
-          }
-        });
+        // const confusedText = confusedResponse[random()];
+        // const choiceArr = response.data.botResponse.response.split("<-|->");
+        // botFullResponse.value = confusedText;
+        // choiceArr.forEach((choice: string, index: number) => {
+        //   if (choice !== "") {
+        //     botFullResponse.value += index + 1 + ". " + choice + "\n";
+        //   }
+        // });
+        botFullResponse.value = response.data.botResponse.response;
         botFullResponse.value +=
           "Please rewrite the question if you desire to choose from the above!";
-        botFullResponse.value = botFullResponse.value.replace(/\n/g, "<br>");
       }
+      botFullResponse.value = botFullResponse.value.replace(/\n/g, "<br>");
     } else {
       const response = await api.post(
         "https://tubes3stima.pythonanywhere.com/completion",
         { request: request.text },
         {
-          headers: { 'Content-Type': 'application/json' },
+          headers: { "Content-Type": "application/json" },
         }
       );
       if (response !== undefined) {
@@ -216,10 +221,12 @@ onMounted(() => {
   <q-page class="tw-h-screen bg-primary">
     <q-drawer v-model="drawer" overlay bordered>
       <div class="q-pa-md tw-h-screen bg-grey-2">
-        <div class="text-h4 q-mb-md text-accent">Chat History</div>
+        <div class="text-h4 q-mb-md text-accent tw-flex tw-justify-center">
+          Chat History
+        </div>
         <q-scroll-area
           style="height: 70%"
-          class=""
+          class="tw-px-1"
           :vertical-thumb-style="{ width: '5px' }"
         >
           <q-btn
@@ -235,7 +242,7 @@ onMounted(() => {
           <q-tabs
             v-model="currentConversationID"
             vertical
-            class="tw-py-4 text-body text-accent"
+            class="tw-py-4 text-body text-accent tw-w-full"
             active-bg-color="secondary"
             active-color="white"
           >
@@ -252,7 +259,12 @@ onMounted(() => {
               >
                 <div class="tw-flex tw-items-center">
                   <q-icon name="chat" class="tw-pr-2" />
-                  <span>{{ history.topic }}</span>
+                  <template v-if="history.topic.length > 15">
+                    <span>{{ history.topic.substring(0, 15) }}...</span>
+                  </template>
+                  <template v-else>
+                    <span>{{ history.topic.substring(0, 15) }}</span>
+                  </template>
                 </div>
               </q-tab>
             </template>
@@ -301,13 +313,13 @@ onMounted(() => {
     <q-splitter v-model="splitter" :separator-style="{ display: 'none' }">
       <template v-slot:before>
         <div
-          class="q-pa-md tw-h-screen"
+          class="q-pa-md tw-h-screen tw-max-w-lg"
           style="border-right: solid 2px #f46197"
         >
           <div class="text-h4 q-mb-md text-accent tw-mt-2">Chat History</div>
           <q-scroll-area
             style="height: 70%"
-            class="tw-pr-2"
+            class="tw-px-2"
             :vertical-thumb-style="{ width: '5px' }"
           >
             <q-btn
@@ -340,7 +352,12 @@ onMounted(() => {
                 >
                   <div class="tw-flex tw-items-center">
                     <q-icon name="chat" class="tw-pr-2" />
-                    <span>{{ history.topic }}</span>
+                    <template v-if="history.topic.length > 20">
+                      <span>{{ history.topic.substring(0, 20) }}...</span>
+                    </template>
+                    <template v-else>
+                      <span>{{ history.topic.substring(0, 20) }}</span>
+                    </template>
                   </div>
                 </q-tab>
               </template>
@@ -387,7 +404,9 @@ onMounted(() => {
 
       <template v-slot:after>
         <template v-if="method === 'GPT'">
-          <h6 class="tw-absolute tw-right-2 text-warning">Please note that GPT Mode will not be saved to our database!</h6>
+          <h6 class="tw-absolute tw-right-2 text-warning">
+            Please note that GPT Mode will not be saved to our database!
+          </h6>
         </template>
         <div
           style="width: 100%"
