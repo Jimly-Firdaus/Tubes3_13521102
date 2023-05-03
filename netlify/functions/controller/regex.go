@@ -54,6 +54,7 @@ func FilterEquation(eq string) string {
 	newStr := strings.Replace(eq, "berapakah ", "", 1)
 	newStr = strings.Replace(newStr, "berapa ", "", 1)
 	newStr = strings.Replace(newStr, "hasil dari ", "", 1)
+	newStr = strings.Replace(newStr, "?", "", 1)
 	return newStr
 }
 
