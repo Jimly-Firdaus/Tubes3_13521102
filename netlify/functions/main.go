@@ -89,6 +89,7 @@ func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResp
 			return controller.ParseUserMessage(request, db, regexes)
 		}
 		if request.Path == "/.netlify/functions/endpoint/history" {
+			fmt.Println("Hit /history")
 			return controller.GetHistoryByID(request, db) // change this func to return History with given history id from front-end
 		}
 	case http.MethodOptions:
