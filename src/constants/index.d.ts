@@ -50,17 +50,6 @@ export interface Request {
   method: 'KMP' | 'BoyerMoore' | 'GPT';
 }
 
-// Future use --ignore this
-export interface userData {
-  userId: number;
-  username?: string;
-  messageHistory: MessageHistory;
-}
-
-export interface UserMessageHistory extends MessageHistory {
-  userId: number;
-}
-
 export interface MessageInterface extends Message {
   response: string;
   responseStatusCode: number;
@@ -76,4 +65,13 @@ export interface MessageInterface extends Message {
   setResponseStatus(status: boolean): void;
   setResponse(text: string, statusCode: number): void;
   setHistoryTimestamp(timestamp: string): void;
+}
+
+export interface HistoryRequest {
+  historyId: number;
+  historyTopic: string;
+}
+
+export interface HistoryPayload {
+  historyCollection: Array<HistoryRequest>;
 }
