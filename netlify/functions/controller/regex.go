@@ -82,6 +82,64 @@ func StringMatching(req *structs.Request, db *sql.DB, questions []structs.BotRes
 	}
 	return false
 }
+func LevenshteinController(req *structs.Request, stat *string, db *sql.DB, questions []structs.BotResponse) {
+	// No match found
+	qList := []struct {
+		i float64
+		s string
+		a string
+	}{}
+	for _, question := range questions {
+		req := req.Text
+		distance := FeatureStringmatching.LevenshteinDistance(question.Question, req)
+		qList = append(qList, struct {
+			i float64
+			s string
+			a string
+		}{
+			i: distance,
+			s: question.Question,
+			a: question.Answer,
+		})
+	}
+	// Sort Descending by Percentage value
+	sort.Slice(qList, func(i, j int) bool {
+		return qList[i].i > qList[j].i
+	})
+	if len(qList) != 0 {
+		if qList[0].i > 0.9 {
+			req.Response = qList[0].a
+			return
+		} else {
+			var x int
+			for i := 0; i < len(qList); {
+				if qList[i].i > 0.5 {
+					x = x + 1
+				}
+			}
+			if x != 0 {
+				*stat = "404"
+				req.Response = "Pertanyaan tidak ditemukan di database.\nApakah maksud anda:\n"
+			} else {
+				req.Response = "Tidak ada pertanyaan tersebut dalam database."
+				return
+			}
+
+			if x > 3 {
+				for i := 0; i < 3; i++ {
+					req.Response = req.Response + strconv.Itoa(i+1) + ". " + qList[i].s + "\n"
+				}
+			} else {
+				for i := 0; i < x; i++ {
+					req.Response = req.Response + strconv.Itoa(i+1) + ". " + qList[i].s + "\n"
+				}
+			}
+		}
+	} else {
+		req.Response = "Tidak ada pertanyaan tersebut dalam database."
+		return
+	}
+}
 func GetResponse(req *structs.Request, index int, stat *string, db *sql.DB) {
 	// Fitur Tambah Pertanyaan
 	if index == 1 {
@@ -120,6 +178,7 @@ func GetResponse(req *structs.Request, index int, stat *string, db *sql.DB) {
 
 	} else if index == 3 { // Fitur Kalendar
 		// Split unnecessary string value
+		req.Text = strings.ToLower(req.Text)
 		date := FilterDate(req.Text)
 
 		// Set bot response
@@ -144,72 +203,15 @@ func GetResponse(req *structs.Request, index int, stat *string, db *sql.DB) {
 			panic(err)
 		}
 		//
-		if StringMatching(req, db, questions) {
-			return // terminate because match answer has been found
-		}
-
-		// No match found
-		qList := []struct {
-			i float64
-			s string
-			a string
-		}{}
-		for _, question := range questions {
-			req := req.Text
-			distance := FeatureStringmatching.LevenshteinDistance(question.Question, req)
-			qList = append(qList, struct {
-				i float64
-				s string
-				a string
-			}{
-				i: distance,
-				s: question.Question,
-				a: question.Answer,
-			})
-		}
-		// Sort Descending by Percentage value
-		sort.Slice(qList, func(i, j int) bool {
-			return qList[i].i > qList[j].i
-		})
-		if len(qList) != 0 {
-			if qList[0].i > 0.9 {
-				req.Response = qList[0].a
-				return
-			} else {
-				var x int
-				for i := 0; i < len(qList); {
-					if qList[i].i > 0.5 {
-						x++
-					}
-				}
-				if x != 0 {
-					*stat = "404"
-					req.Response = "Pertanyaan tidak ditemukan di database.\nApakah maksud anda:\n"
-				} else {
-					req.Response = "Tidak ada pertanyaan tersebut dalam database."
-					return
-				}
-
-				if x > 3 {
-					for i := 0; i < 3; i++ {
-						req.Response = strconv.Itoa(i+1) + ". " + req.Response + qList[i].s + "\n"
-					}
-				} else {
-					for i := 0; i < x; i++ {
-						req.Response = strconv.Itoa(i+1) + ". " + req.Response + qList[i].s + "\n"
-					}
-				}
-			}
-		} else {
-			req.Response = "Tidak ada pertanyaan tersebut dalam database."
-			return
+		if !StringMatching(req, db, questions) {
+			LevenshteinController(req, stat, db, questions) // no match found, then use levenshtein
 		}
 	}
 	// Adding user message to the database
 
 	// First we check if the historyID is already in database or not
 
-	if (repository.CheckHistoryExist(db, int(req.HistoryId)) || req.HistoryTimeStamp == "") {
+	if repository.CheckHistoryExist(db, int(req.HistoryId)) || req.HistoryTimeStamp == "" {
 		// If history already exist then we only need to add to table UserMessage and HistoryMessage
 		err := repository.InsertUserMessage(db, *req)
 
