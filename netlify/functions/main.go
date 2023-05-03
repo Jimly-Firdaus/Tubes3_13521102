@@ -73,8 +73,8 @@ func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResp
 	case http.MethodGet:
 		fmt.Printf("Request: %+v\n", request)
 		fmt.Println("Hit history get")
-		if request.Path == "/.netlify/functions/endpoint/history" {
-			response, err := controller.GetAllHistoryMessage(request, db)
+		if request.Path == "/.netlify/functions/endpoint/history-topic" {
+			response, err := controller.GetAllHistoryMessage(request, db) // change this func to return HistoryPayload
 			if err != nil {
 				return response, err
 			}
@@ -88,8 +88,22 @@ func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResp
 		if request.Path == "/.netlify/functions/endpoint/getmessage" {
 			return controller.ParseUserMessage(request, db, regexes)
 		}
+		if request.Path == "/.netlify/functions/endpoint/history" {
+			return controller.ParseUserMessage(request, db, regexes) // change this func to return History with given history id from front-end
+		}
 	case http.MethodOptions:
 		if request.Path == "/.netlify/functions/endpoint/getmessage" {
+			headers := map[string]string{
+				"Access-Control-Allow-Origin":  "*",
+				"Access-Control-Allow-Methods": "POST",
+				"Access-Control-Allow-Headers": "Content-Type",
+			}
+			return &events.APIGatewayProxyResponse{
+				StatusCode: http.StatusOK,
+				Headers:    headers,
+			}, nil
+		}
+		if request.Path == "/.netlify/functions/endpoint/history" {
 			headers := map[string]string{
 				"Access-Control-Allow-Origin":  "*",
 				"Access-Control-Allow-Methods": "POST",
