@@ -115,9 +115,8 @@ func LevenshteinController(req *structs.Request, stat *string, db *sql.DB, quest
 			var x int
 			for i := 0; i < len(qList); {
 				if qList[i].i > 0.5 {
-					x++
+					x = x + 1
 				}
-				i++
 			}
 			if x != 0 {
 				*stat = "404"
@@ -205,7 +204,7 @@ func GetResponse(req *structs.Request, index int, stat *string, db *sql.DB) {
 			panic(err)
 		}
 		//
-		if StringMatching(req, db, questions) == false {
+		if !StringMatching(req, db, questions) {
 			LevenshteinController(req, stat, db, questions) // no match found, then use levenshtein
 		}
 	}
