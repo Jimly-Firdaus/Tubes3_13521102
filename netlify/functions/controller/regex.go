@@ -9,6 +9,7 @@ import (
 	"database/sql"
 	"regexp"
 	"sort"
+	"strconv"
 	"strings"
 )
 
@@ -190,11 +191,11 @@ func GetResponse(req *structs.Request, index int, stat *string, db *sql.DB) {
 
 				if x > 3 {
 					for i := 0; i < 3; i++ {
-						req.Response = req.Response + qList[i].s + "\n"
+						req.Response = strconv.Itoa(i+1) + ". " + req.Response + qList[i].s + "\n"
 					}
 				} else {
 					for i := 0; i < x; i++ {
-						req.Response = req.Response + qList[i].s + "\n"
+						req.Response = strconv.Itoa(i+1) + ". " + req.Response + qList[i].s + "\n"
 					}
 				}
 			}
