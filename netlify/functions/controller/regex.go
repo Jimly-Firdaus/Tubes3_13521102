@@ -117,6 +117,7 @@ func LevenshteinController(req *structs.Request, stat *string, db *sql.DB, quest
 				if qList[i].i > 0.5 {
 					x = x + 1
 				}
+				i++
 			}
 			if x != 0 {
 				*stat = "404"
@@ -179,7 +180,7 @@ func GetResponse(req *structs.Request, index int, stat *string, db *sql.DB) {
 
 	} else if index == 3 { // Fitur Kalendar
 		// Split unnecessary string value
-		req.Text = strings.ToLower(req.Text)
+
 		date := FilterDate(req.Text)
 
 		// Set bot response
