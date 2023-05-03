@@ -3,74 +3,48 @@ package controller
 import (
 	"TUBES3_13521102/netlify/functions/repository"
 	"database/sql"
-	"log"
+	"encoding/json"
+	"fmt"
 	"net/http"
-	"strconv"
 
-	"github.com/gin-gonic/gin"
+	"github.com/aws/aws-lambda-go/events"
 )
-func GetHistoryByHistoryID(c *gin.Context){
-  // Receive historyID through front end
-  historyID, err := strconv.ParseInt(c.Param("historyID"), 10, 64)
-  if err != nil {
-      c.JSON(http.StatusBadRequest, gin.H{
-          "error": "Invalid history ID",
-      })
-      return
-  }
 
-  db, err := sql.Open("mysql", "root:PNGO6atNekbjjq4g2yPy@tcp(containers-us-west-13.railway.app:6330)/railway")
-  if err != nil {
-      c.JSON(http.StatusInternalServerError, gin.H{
-          "error": err.Error(),
-      })
-      return
-  }
-  pingErr := db.Ping()
-  if pingErr != nil {
-      log.Fatal(pingErr)
-  }
+func GetHistoryByID(request events.APIGatewayProxyRequest, db *sql.DB) (*events.APIGatewayProxyResponse, error) {
+	// Parse the request body into a Request struct
+	var hid int64
+	var status string
+	if err := json.Unmarshal([]byte(request.Body), &hid); err != nil {
+		return &events.APIGatewayProxyResponse{
+			StatusCode: http.StatusBadRequest,
+			Body:       err.Error(),
+		}, nil
+	}
 
-  defer db.Close()
+	// Use the message and method fields in the Request struct
+	fmt.Println(hid)
+	status = "200"
+	hist, err := repository.GetHistoryByHistoryID(db, hid)
+	// Parameter jadi struct.
+	// TO DO : Masukin database
+	// Write a response back to the client
+	responseBody, err := json.Marshal(map[string]interface{}{
+		"message": status,
+		"history": hist,
+	})
+	if err != nil {
+		return &events.APIGatewayProxyResponse{
+			StatusCode: http.StatusInternalServerError,
+			Body:       err.Error(),
+		}, nil
+	}
 
-  historybyID, err := repository.GetHistoryByHistoryID(db, historyID)
-  // historyByID, err := repository.GetHistoryByHistoryID(database.db, historyID)
-  c.JSON(http.StatusOK, gin.H{
-      "historybyID": historybyID,
-  })
+	return &events.APIGatewayProxyResponse{
+		StatusCode: http.StatusOK,
+		Body:       string(responseBody),
+		Headers: map[string]string{
+			"Content-Type":                "application/json",
+			"Access-Control-Allow-Origin": "*",
+		},
+	}, nil
 }
-
-
-// func InsertHistory(c *gin.Context){
-//   var (
-//     history structs.History
-//     err error
-//   )
-//   db, err := sql.Open("mysql", "root:PNGO6atNekbjjq4g2yPy@tcp(containers-us-west-13.railway.app:6330)/railway")
-//   if err != nil {
-//       c.JSON(http.StatusInternalServerError, gin.H{
-//           "error": err.Error(),
-//       })
-//       return
-//   }
-//   pingErr := db.Ping()
-//   if pingErr != nil {
-//       log.Fatal(pingErr)
-//   }
-
-//   defer db.Close()
-
-//   err = c.ShouldBindJSON(&history)
-//   if (err != nil){
-//     panic(err)
-//   }
-//   err = repository.InsertHistory(db, history, history.)
-// 	if err != nil {
-// 		panic(err)
-// 	}
-
-// 	c.JSON(http.StatusOK, gin.H{
-// 		"result": "Success Create History",
-// 	})
-
-// }

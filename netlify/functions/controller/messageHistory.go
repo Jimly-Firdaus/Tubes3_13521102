@@ -28,7 +28,7 @@ func GetAllHistoryMessage(request events.APIGatewayProxyRequest, db *sql.DB) (*e
 	// 	}, nil
 	// }
 
-	historyMessageList, err := repository.GetAllHistoryMessage(db)
+	historyPayload, err := repository.GetAllHistory(db)
 	if err != nil {
 		return &events.APIGatewayProxyResponse{
 			StatusCode: http.StatusInternalServerError,
@@ -37,7 +37,7 @@ func GetAllHistoryMessage(request events.APIGatewayProxyRequest, db *sql.DB) (*e
 	}
 
 	responseBody, err := json.Marshal(map[string]interface{}{
-		"historyMessage": historyMessageList,
+		"historyPayload": historyPayload,
 	})
 	if err != nil {
 		return &events.APIGatewayProxyResponse{

@@ -16,7 +16,7 @@ import (
 // Function to get only pertanyaan and jawaban from string
 func GetPertanyaanJawaban(req string) []string {
 	// Replacing unnecessary string value with null
-	substr1 := "Tambahkan pertanyaan "
+	substr1 := "tambahkan pertanyaan "
 	substr2 := "dengan jawaban "
 	newStr := strings.Replace(req, substr1, "", 1)
 	newStr = strings.Replace(newStr, substr2, "", 1)
@@ -32,7 +32,7 @@ func GetPertanyaanJawaban(req string) []string {
 // Function to get only pertanyaan from string
 func GetPertanyaan(req string) string {
 	// Replacing unnecessary string value with null
-	substr1 := "Hapus pertanyaan "
+	substr1 := "hapus pertanyaan "
 
 	newStr := strings.Replace(req, substr1, "", 1)
 
@@ -42,11 +42,18 @@ func GetPertanyaan(req string) string {
 // Function to get only date from string
 func FilterDate(date string) string {
 	// Replacing unnecessary string value with null
-	substr := "Hari apa "
-	newStr := strings.Replace(date, substr, "", 1)
-	newStr = strings.Replace(newStr, "?", "", 1)
+	newStr := strings.Replace(date, "?", "", 1)
 	newStr = strings.Replace(newStr, "hari apa ", "", 1)
+	newStr = strings.Replace(newStr, "hari apakah ", "", 1)
 
+	return newStr
+}
+
+// Function get only equation from string
+func FilterEquation(eq string) string {
+	newStr := strings.Replace(eq, "berapakah ", "", 1)
+	newStr = strings.Replace(newStr, "berapa ", "", 1)
+	newStr = strings.Replace(newStr, "hasil dari ", "", 1)
 	return newStr
 }
 
@@ -146,7 +153,7 @@ func GetResponse(req *structs.Request, index int, stat *string, db *sql.DB) {
 	// Fitur Tambah Pertanyaan
 	if index == 1 {
 		// Get only question and answer from string
-		result := GetPertanyaanJawaban(req.Text)
+		result := GetPertanyaanJawaban(strings.ToLower(req.Text))
 
 		question := result[0]
 		answer := result[1]
@@ -166,7 +173,7 @@ func GetResponse(req *structs.Request, index int, stat *string, db *sql.DB) {
 
 	} else if index == 2 { // Fitur Hapus Pertanyaan
 		// Get only question from string
-		question := GetPertanyaan(req.Text)
+		question := GetPertanyaan(strings.ToLower(req.Text))
 
 		// Delete question from table
 		err := repository.DeleteBotResponse(db, question)
@@ -181,15 +188,16 @@ func GetResponse(req *structs.Request, index int, stat *string, db *sql.DB) {
 	} else if index == 3 { // Fitur Kalendar
 		// Split unnecessary string value
 
-		date := FilterDate(req.Text)
+		date := FilterDate(strings.ToLower(req.Text))
 
 		// Set bot response
 		req.Response = FeatureDate.FindDayName(date)
 
 	} else if index == 4 { //  Fitur Kalkulator
 
+		equation := FilterEquation(strings.ToLower(req.Text))
 		// Get expression result
-		result, err := FeatureCalculator.CalculateExpression(req.Text)
+		result, err := FeatureCalculator.CalculateExpression(equation)
 
 		if err != nil {
 			panic(err)
@@ -204,7 +212,7 @@ func GetResponse(req *structs.Request, index int, stat *string, db *sql.DB) {
 		if err != nil {
 			panic(err)
 		}
-		//
+		// String matching with KMP/BoyerMoore based on method request
 		if !StringMatching(req, db, questions) {
 			LevenshteinController(req, stat, db, questions) // no match found, then use levenshtein
 		}

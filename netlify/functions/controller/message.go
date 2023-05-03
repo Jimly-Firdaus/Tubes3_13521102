@@ -39,7 +39,7 @@ func InsertUserMessage(c *gin.Context) {
 	if err != nil {
 		panic(err)
 	}
-	err = repository.InsertUserMessage(db, msg)
+	err = repository.InsertMessages(db, msg)
 	if err != nil {
 		panic(err)
 	}
@@ -74,7 +74,7 @@ func GetUserMessageByID(c *gin.Context) {
 
 	defer db.Close()
 
-	userMessage, err := repository.GetUserMessageByID(db, userQuestionID)
+	userMessage, err := repository.GetMessagesByID(db, userQuestionID)
 	// historyByID, err := repository.GetHistoryByHistoryID(database.db, historyID)
 	c.JSON(http.StatusOK, gin.H{
 		"userMessage": userMessage,
