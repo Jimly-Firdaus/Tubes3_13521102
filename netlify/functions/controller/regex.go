@@ -217,7 +217,7 @@ func GetResponse(req *structs.Request, index int, stat *string, db *sql.DB) {
 			panic(err)
 		}
 
-		err = repository.InsertHistoryMessage(db, int(req.HistoryId))
+		err = repository.InsertHistoryMessage(db, int(req.HistoryId), req.Text)
 
 		if err != nil {
 			panic(err)
@@ -253,7 +253,7 @@ func GetResponse(req *structs.Request, index int, stat *string, db *sql.DB) {
 			panic(err)
 		}
 
-		err = repository.InsertHistoryMessage(db, int(req.HistoryId))
+		err = repository.InsertHistoryMessage(db, int(req.HistoryId), req.Text)
 
 		if err != nil {
 			panic(err)
