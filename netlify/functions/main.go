@@ -84,9 +84,6 @@ func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResp
 			fmt.Println("Hit history")
 			return response, nil
 		}
-		//  else if request.Path == ".netlify/functions/endpoint/giveresponse" {
-		// 	response, err := controller.GetAllHistoryMessage(request)
-		// }
 	case http.MethodPost:
 		if request.Path == "/.netlify/functions/endpoint/getmessage" {
 			return controller.ParseUserMessage(request, db, regexes)

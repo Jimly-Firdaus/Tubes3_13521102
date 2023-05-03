@@ -150,6 +150,7 @@ func GetResponse(req *structs.Request, index int, stat *string, db *sql.DB) {
 		qList := []struct {
 			i float64
 			s string
+			a string
 		}{}
 		for _, question := range questions {
 			req := req.Text
@@ -157,9 +158,11 @@ func GetResponse(req *structs.Request, index int, stat *string, db *sql.DB) {
 			qList = append(qList, struct {
 				i float64
 				s string
+				a string
 			}{
 				i: distance,
 				s: question.Question,
+				a: question.Answer,
 			})
 		}
 		// Sort Descending by Percentage value
@@ -168,7 +171,7 @@ func GetResponse(req *structs.Request, index int, stat *string, db *sql.DB) {
 		})
 		if len(qList) != 0 {
 			if qList[0].i > 0.9 {
-				req.Response = qList[0].s
+				req.Response = qList[0].a
 				return
 			} else {
 				var x int
@@ -181,7 +184,7 @@ func GetResponse(req *structs.Request, index int, stat *string, db *sql.DB) {
 					*stat = "404"
 					req.Response = "Pertanyaan tidak ditemukan di database.\nApakah maksud anda:\n"
 				} else {
-					req.Response = "Tidak ada pertanyaan tersebut dalam database"
+					req.Response = "Tidak ada pertanyaan tersebut dalam database."
 					return
 				}
 
@@ -196,7 +199,7 @@ func GetResponse(req *structs.Request, index int, stat *string, db *sql.DB) {
 				}
 			}
 		} else {
-			req.Response = "Tidak ada pertanyaan tersebut dalam database"
+			req.Response = "Tidak ada pertanyaan tersebut dalam database."
 			return
 		}
 	}
