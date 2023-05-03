@@ -54,7 +54,6 @@ const fetchHistories = async () => {
   const response = await api.get(
     "https://iridescent-jalebi-788066.netlify.app/.netlify/functions/endpoint/history"
   );
-  (response.data);
   const fetchedMessageHistory: [] = response.data.historyMessage.messageHistory;
   fetchedMessageHistory.forEach((ele: History, index) => {
     const arrayOfConversation: Array<MessageInterface> = [];
@@ -77,9 +76,6 @@ const fetchHistories = async () => {
     };
     chatHistories.messageHistory.push(history);
   });
-  (chatHistories);
-  const { generateMessageId } = useMessages({ chatHistories });
-  currentConversationID.value = generateMessageId();
   // chatHistories.messageHistory.reverse();
   $q.loading.hide();
 };
@@ -107,11 +103,12 @@ const newChat = () => {
 
 const switchConversation = () => {
   // replace the current array to chosen history conversation
-  (currentConversationID.value);
-  let chosenHistory: History;
   chatHistories.messageHistory.forEach((history, index) => {
     if (history.historyId == currentConversationID.value) {
       messages.splice(0, messages.length, ...history.conversation);
+      messages.forEach((message, index) => {
+        message.text = message.text.replace(/\n/g, "<br>");
+      })
     }
   })
   scrollToBottom();
@@ -144,7 +141,6 @@ const sendMessage = async () => {
         currentConversationID.value
       );
     }
-    (userMessage);
     messages.push(userMessage);
     const currentTopic = filteredStr;
 
@@ -243,9 +239,11 @@ watch([messages, currentConversationID], () => {
   scrollToBottom();
 });
 
-onMounted(() => {
+onMounted(async () => {
   scrollToBottom();
-  fetchHistories();
+  await fetchHistories();
+  const { generateMessageId } = useMessages({ chatHistories });
+  currentConversationID.value = generateMessageId();
 });
 </script>
 <template>
