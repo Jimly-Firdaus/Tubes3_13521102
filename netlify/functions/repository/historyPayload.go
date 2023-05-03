@@ -17,7 +17,7 @@ func GetAllHistory(db *sql.DB) (results structs.HistoryPayload, err error) {
 	for rows.Next() {
 		var historyReq = structs.HistoryRequest{}
 
-		err = rows.Scan(&historyReq.HistoryID, historyReq.HistoryTopic)
+		err = rows.Scan(&historyReq.HistoryID, &historyReq.HistoryTopic)
 
 		if err != nil {
 			panic(err)
