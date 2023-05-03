@@ -9,12 +9,18 @@ export const useMessages = ({
 } = {}) => {
   const generateMessageId = () => {
     if (chatHistories) {
-      chatHistories.messageHistory.forEach((history, index) => {
-        if (history.historyId !== index + 1) {
-          return index + 1;
+      const historyIds = chatHistories.messageHistory.map(
+        (history) => history.historyId
+      );
+      historyIds.sort((a, b) => a - b);
+      let availableId = 1;
+      for (let i = 0; i < historyIds.length; i++) {
+        if (historyIds[i] !== availableId) {
+          break;
         }
-      });
-      return chatHistories.messageHistory.length + 1;
+        availableId++;
+      }
+      return availableId;
     } else {
       return -1;
     }
