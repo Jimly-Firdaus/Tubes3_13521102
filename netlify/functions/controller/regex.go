@@ -45,6 +45,7 @@ func FilterDate(date string) string {
 	substr := "Hari apa "
 	newStr := strings.Replace(date, substr, "", 1)
 	newStr = strings.Replace(newStr, "?", "", 1)
+	newStr = strings.Replace(newStr, "hari apa ", "", 1)
 
 	return newStr
 }
