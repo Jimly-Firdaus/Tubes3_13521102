@@ -22,11 +22,38 @@ func InsertHistory(db *sql.DB, history structs.History, datetime string) (error)
 
 
 func DeleteHistory(db *sql.DB, historyID int) (error) {
+  // Getting all usermessageID that is related to the history to delete
+  messageRows, err := db.Query("SELECT userQuestionID FROM HistoryMessage WHERE historyID = ?")
+
+  if err != nil {
+    panic(err)
+  }
+
+  defer messageRows.Close()
+
+  var messageIDs []int
+  var count = 0
+  for messageRows.Next() {
+    var messageID int
+    messageRows.Scan(&messageID)
+    messageIDs[count] = messageID
+    count++
+  }
+
   // Deleting from foreign key table first
   _, errs := db.Exec("DELETE FROM HistoryMessage WHERE historyID = ?", historyID)
 
   if errs != nil {
     panic(errs)
+  }
+
+  // Deleting all question from userMessage table
+  for i := 0; i < len(messageIDs); i++ {
+    err = DeleteUserMessage(db, messageIDs[i])
+    
+    if err != nil {
+      panic(err)
+    }
   }
 
   res, errs := db.Exec("DELETE FROM History WHERE historyID = ?", historyID)

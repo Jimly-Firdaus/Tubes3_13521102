@@ -15,6 +15,16 @@ func InsertUserMessage(db *sql.DB, newMessage structs.Request) (error) {
   return nil
 }
 
+func DeleteUserMessage(db *sql.DB, userQuestionID int) (error) {
+  err := db.QueryRow("DELETE FROM UserMessage WHERE userQuestionID = ?", userQuestionID)
+
+  if err != nil {
+    return err.Err()
+  }
+
+  return nil
+}
+
 func InsertHistoryMessage(db *sql.DB, historyID int, userQuestion string) (error) {
     rows, err := db.Query("SELECT userQuestionID FROM UserMessage WHERE userQuestion = ?", userQuestion)
 
