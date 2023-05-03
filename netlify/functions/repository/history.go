@@ -22,37 +22,13 @@ func InsertHistory(db *sql.DB, history structs.History, datetime string) (error)
 
 
 func DeleteHistory(db *sql.DB, historyID int) (error) {
-  // Getting all usermessageID that is related to the history to delete
-  // messageRows, err := db.Query("SELECT userQuestionID FROM HistoryMessage WHERE historyID = ?", historyID)
 
-  // if err != nil {
-  //   panic(err)
-  // }
+  // Deleting foreign key table value first
+  _, err := db.Exec("Delete FROM Messages WHERE historyID = ?", historyID)
 
-  // defer messageRows.Close()
-
-  // messageIDs := make([]int, 0, 5)
-  // for messageRows.Next() {
-  //   var messageID int
-  //   messageRows.Scan(&messageID)
-  //   messageIDs = append(messageIDs, messageID)
-  // }
-
-  // Deleting from foreign key table first
-  _, errs := db.Exec("DELETE FROM HistoryMessage WHERE historyID = ?", historyID)
-
-  if errs != nil {
-    panic(errs)
+  if err != nil {
+    panic(err)
   }
-
-  // Deleting all question from userMessage table
-  // for i := 0; i < len(messageIDs); i++ {
-  //   err = DeleteUserMessage(db, messageIDs[i])
-    
-  //   if err != nil {
-  //     panic(err)
-  //   }
-  // }
 
   res, errs := db.Exec("DELETE FROM History WHERE historyID = ?", historyID)
   n, _ := res.RowsAffected()
@@ -68,20 +44,6 @@ func DeleteHistory(db *sql.DB, historyID int) (error) {
   return nil
 }
 
-func UpdateHistory(db *sql.DB, history structs.History) (error) {
-  res, errs := db.Exec("UPDATE History SET historyTitle = ? WHERE historyID = ?", history.Topic, history.HistoryID)
-  n, _ := res.RowsAffected()
-
-  if errs != nil {
-    panic(errs)
-  }
-
-  if n == 0 {
-    return sql.ErrNoRows
-  }
-
-  return nil
-}
 
 func GetHistoryByHistoryID(db *sql.DB, historyID int64) (results structs.History, err error) {
   rows, err := db.Query("SELECT historyID, historyTitle FROM History WHERE historyID = ?", historyID)
@@ -93,9 +55,6 @@ func GetHistoryByHistoryID(db *sql.DB, historyID int64) (results structs.History
   defer rows.Close()
 
   for rows.Next() {
-    // type DateType time.Time
-
-    // var date DateType
 
     err = rows.Scan(&results.HistoryID, &results.Topic)
 
@@ -103,33 +62,15 @@ func GetHistoryByHistoryID(db *sql.DB, historyID int64) (results structs.History
       panic(err)
     }
 
-    // Get all messages for current history
-    var questionId int64
-
-    messageRows, errs := db.Query("SELECT userQuestionID FROM HistoryMessage WHERE historyID = ?", results.HistoryID)
-
-    if errs != nil {
-      panic(errs)
-    }
-
-    defer messageRows.Close()
-
-    for messageRows.Next() {
-      errs = messageRows.Scan(&questionId)
-
-      if errs != nil {
-        panic(errs)
-      }
-
-      message, err := GetUserMessageByID(db, questionId)
-
-      if err != nil {
-        panic(err)
-      }
-
-      results.Conversation = append(results.Conversation, message...)
-    }
   }
+
+  messages, err := GetHistoryMessages(db, int(historyID))
+
+  if err != nil {
+    panic(err)
+  }
+
+  results.Conversation = append(results.Conversation, messages...)
 
   return
 }

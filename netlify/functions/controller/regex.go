@@ -214,18 +214,13 @@ func GetResponse(req *structs.Request, index int, stat *string, db *sql.DB) {
 	// First we check if the historyID is already in database or not
 
 	if repository.CheckHistoryExist(db, int(req.HistoryId)) || req.HistoryTimeStamp == "" {
-		// If history already exist then we only need to add to table UserMessage and HistoryMessage
-		err := repository.InsertUserMessage(db, *req)
+		// If history already exist then we only need to add to table Messages
+		err := repository.InsertMessages(db, *req)
 
 		if err != nil {
 			panic(err)
 		}
 
-		err = repository.InsertHistoryMessage(db, int(req.HistoryId), req.Text)
-
-		if err != nil {
-			panic(err)
-		}
 	} else {
 		// IF history doesn't exist yet we check how many rows there are now in History table
 		if repository.CountHistory(db) >= 10 {
@@ -249,15 +244,9 @@ func GetResponse(req *structs.Request, index int, stat *string, db *sql.DB) {
 			panic(err)
 		}
 
-		// Also don't forget to insert row to userMessage table
+		// Also don't forget to insert row to Messages table
 
-		err = repository.InsertUserMessage(db, *req)
-
-		if err != nil {
-			panic(err)
-		}
-
-		err = repository.InsertHistoryMessage(db, int(req.HistoryId), req.Text)
+		err = repository.InsertMessages(db, *req)
 
 		if err != nil {
 			panic(err)

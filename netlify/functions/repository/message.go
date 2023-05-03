@@ -5,8 +5,8 @@ import (
 	"database/sql"
 )
 
-func InsertUserMessage(db *sql.DB, newMessage structs.Request) (error) {
-  err := db.QueryRow("INSERT INTO UserMessage(userQuestion, botAnswer, sentTime) VALUES(?, ?, ?)", newMessage.Text, newMessage.Response, newMessage.SentTime)
+func InsertMessages(db *sql.DB, newMessage structs.Request) (error) {
+  err := db.QueryRow("INSERT INTO Messages(userQuestion, botAnswer, sentTime, historyID) VALUES(?, ?, ?, ?)", newMessage.Text, newMessage.Response, newMessage.SentTime, newMessage.HistoryId)
 
   if err != nil {
     return err.Err()
@@ -15,8 +15,8 @@ func InsertUserMessage(db *sql.DB, newMessage structs.Request) (error) {
   return nil
 }
 
-func DeleteUserMessage(db *sql.DB, userQuestionID int) (error) {
-  err := db.QueryRow("DELETE FROM UserMessage WHERE userQuestionID = ?", userQuestionID)
+func DeleteMessages(db *sql.DB, userQuestionID int) (error) {
+  err := db.QueryRow("DELETE FROM Messages WHERE userQuestionID = ?", userQuestionID)
 
   if err != nil {
     return err.Err()
@@ -25,28 +25,8 @@ func DeleteUserMessage(db *sql.DB, userQuestionID int) (error) {
   return nil
 }
 
-func InsertHistoryMessage(db *sql.DB, historyID int, userQuestion string) (error) {
-    rows, err := db.Query("SELECT userQuestionID FROM UserMessage WHERE userQuestion = ?", userQuestion)
-
-    if err != nil {
-      panic(err)
-    }
-
-    defer rows.Close()
-
-    var messageID int
-    for rows.Next() {
-      rows.Scan(&messageID)
-    }
-
-    // Add to HistoryMessage table
-    errs := db.QueryRow("INSERT INTO HistoryMessage VALUES(?, ?)", historyID, messageID)
-
-    return errs.Err()
-}
-
-func GetUserMessageByID(db *sql.DB, userQuestionID int64) (results []structs.Message, err error) {
-  rows, err := db.Query("SELECT * FROM UserMessage WHERE userQuestionID = ?", userQuestionID)
+func GetHistoryMessages(db *sql.DB, historyID int) (results []structs.Message, err error) {
+  rows, err := db.Query("SELECT * FROM Messages WHERE historyID = ?", historyID)
 
   if err != nil {
     panic(err)
@@ -55,49 +35,41 @@ func GetUserMessageByID(db *sql.DB, userQuestionID int64) (results []structs.Mes
   defer rows.Close()
 
   for rows.Next() {
-    // Set UserMessage structs to be added to results
-    var userMessage = structs.Message{}
+    var message = structs.Message{}
 
-    err := rows.Scan(&userMessage.Id, &userMessage.Text, &userMessage.Response, &userMessage.SentTime)
-
-    if err != nil {
-      panic(err)
-    }
-
-    // Query to search for historyID
-    row, err := db.Query("SELECT historyID FROM HistoryMessage WHERE userQuestionID = ?", userMessage.Id)
+    err = rows.Scan(&message.Id, &message.Text, &message.Response, &message.SentTime, &message.HistoryId)
 
     if err != nil {
       panic(err)
     }
-    
-    defer row.Close()
 
-    for row.Next() {
-      row.Scan(&userMessage.HistoryId);
-    }
-
-    results = append(results, userMessage)
+    results = append(results, message)
   }
 
   return
 }
 
-func CountUserMessage(db *sql.DB) int {
-  rows, err := db.Query("SELECT * FROM UserMessage")
+func GetMessagesByID(db *sql.DB, userQuestionID int64) (structs.Message, error) {
+  rows, err := db.Query("SELECT * FROM Messages WHERE userQuestionID = ?", userQuestionID)
 
   if err != nil {
     panic(err)
   }
 
   defer rows.Close()
-
-  var count = 0
+  
+  var Messages = structs.Message{}
 
   for rows.Next() {
-    count++
+
+    err := rows.Scan(&Messages.Id, &Messages.Text, &Messages.Response, &Messages.SentTime, &Messages.HistoryId)
+
+    if err != nil {
+      panic(err)
+    }
+
   }
 
-  return count
+  return Messages, nil
 }
 
