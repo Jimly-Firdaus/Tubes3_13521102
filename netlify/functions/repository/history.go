@@ -23,7 +23,7 @@ func InsertHistory(db *sql.DB, history structs.History, datetime string) (error)
 
 func DeleteHistory(db *sql.DB, historyID int) (error) {
   // Getting all usermessageID that is related to the history to delete
-  messageRows, err := db.Query("SELECT userQuestionID FROM HistoryMessage WHERE historyID = ?")
+  messageRows, err := db.Query("SELECT userQuestionID FROM HistoryMessage WHERE historyID = ?", historyID)
 
   if err != nil {
     panic(err)
@@ -31,13 +31,11 @@ func DeleteHistory(db *sql.DB, historyID int) (error) {
 
   defer messageRows.Close()
 
-  var messageIDs []int
-  var count = 0
+  messageIDs := make([]int, 0, 5)
   for messageRows.Next() {
     var messageID int
     messageRows.Scan(&messageID)
-    messageIDs[count] = messageID
-    count++
+    messageIDs = append(messageIDs, messageID)
   }
 
   // Deleting from foreign key table first
