@@ -23,20 +23,20 @@ func InsertHistory(db *sql.DB, history structs.History, datetime string) (error)
 
 func DeleteHistory(db *sql.DB, historyID int) (error) {
   // Getting all usermessageID that is related to the history to delete
-  messageRows, err := db.Query("SELECT userQuestionID FROM HistoryMessage WHERE historyID = ?", historyID)
+  // messageRows, err := db.Query("SELECT userQuestionID FROM HistoryMessage WHERE historyID = ?", historyID)
 
-  if err != nil {
-    panic(err)
-  }
+  // if err != nil {
+  //   panic(err)
+  // }
 
-  defer messageRows.Close()
+  // defer messageRows.Close()
 
-  messageIDs := make([]int, 0, 5)
-  for messageRows.Next() {
-    var messageID int
-    messageRows.Scan(&messageID)
-    messageIDs = append(messageIDs, messageID)
-  }
+  // messageIDs := make([]int, 0, 5)
+  // for messageRows.Next() {
+  //   var messageID int
+  //   messageRows.Scan(&messageID)
+  //   messageIDs = append(messageIDs, messageID)
+  // }
 
   // Deleting from foreign key table first
   _, errs := db.Exec("DELETE FROM HistoryMessage WHERE historyID = ?", historyID)
@@ -46,13 +46,13 @@ func DeleteHistory(db *sql.DB, historyID int) (error) {
   }
 
   // Deleting all question from userMessage table
-  for i := 0; i < len(messageIDs); i++ {
-    err = DeleteUserMessage(db, messageIDs[i])
+  // for i := 0; i < len(messageIDs); i++ {
+  //   err = DeleteUserMessage(db, messageIDs[i])
     
-    if err != nil {
-      panic(err)
-    }
-  }
+  //   if err != nil {
+  //     panic(err)
+  //   }
+  // }
 
   res, errs := db.Exec("DELETE FROM History WHERE historyID = ?", historyID)
   n, _ := res.RowsAffected()
