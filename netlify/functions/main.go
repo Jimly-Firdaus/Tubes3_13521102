@@ -35,8 +35,8 @@ func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResp
 		`^(?i)Tambahkan pertanyaan (.*) dengan jawaban (.*)$`,          // Tambah pertanyaan
 		`^(?i)Hapus pertanyaan (.*)$`,                                  // Hapus pertanyaan
 		`(?i)^(Hari apa |Hari apakah )?[0-9]{2}/[0-9]{2}/[0-9]{4}\??$`, // Kalendar
-		`(?i)^(Berapakah )?[\d()+\-*\/.^ ]+$`,                          // Kalkulator
-		`.*`,                                                           // Pertanyaan Teks
+		`(?i)^(Berapakah |Berapa |Hasil dari )?[\d()+\-*\/.^ ]+\??$`,   // Kalkulator
+		`.*`, // Pertanyaan Teks
 	}
 	// Compile the patterns into regex objects
 	regexes := make([]*regexp.Regexp, len(patterns))
@@ -89,7 +89,7 @@ func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResp
 			return controller.ParseUserMessage(request, db, regexes)
 		}
 		if request.Path == "/.netlify/functions/endpoint/history" {
-			return controller.ParseUserMessage(request, db, regexes) // change this func to return History with given history id from front-end
+			return controller.GetHistoryByID(request, db) // change this func to return History with given history id from front-end
 		}
 	case http.MethodOptions:
 		if request.Path == "/.netlify/functions/endpoint/getmessage" {
