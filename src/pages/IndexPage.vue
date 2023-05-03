@@ -7,7 +7,7 @@ import {
   MessageHistory,
 } from "src/constants";
 import { ref, Ref, watch, reactive, onMounted, computed } from "vue";
-import { QScrollArea, useQuasar } from "quasar";
+import { QScrollArea, useQuasar, Notify } from "quasar";
 import {
   greetings,
   confusedResponse,
@@ -17,6 +17,7 @@ import { useUtility } from "src/composables/useUtility";
 import { useMessages } from "src/composables/useMessages";
 import { botAvatar, userAvatar } from "src/constants/avatar";
 import { api } from "src/boot/axios";
+import { AxiosError } from "axios";
 
 const $q = useQuasar();
 const BREAKPOINT = 1024;
@@ -53,6 +54,7 @@ const fetchHistories = async () => {
   const response = await api.get(
     "https://iridescent-jalebi-788066.netlify.app/.netlify/functions/endpoint/history"
   );
+  (response.data);
   const fetchedMessageHistory: [] = response.data.historyMessage.messageHistory;
   fetchedMessageHistory.forEach((ele: History, index) => {
     const arrayOfConversation: Array<MessageInterface> = [];
@@ -75,6 +77,10 @@ const fetchHistories = async () => {
     };
     chatHistories.messageHistory.push(history);
   });
+  (chatHistories);
+  const { generateMessageId } = useMessages({ chatHistories });
+  currentConversationID.value = generateMessageId();
+  // chatHistories.messageHistory.reverse();
   $q.loading.hide();
 };
 
@@ -101,9 +107,13 @@ const newChat = () => {
 
 const switchConversation = () => {
   // replace the current array to chosen history conversation
-  const chosenHistory =
-    chatHistories.messageHistory[currentConversationID.value - 1];
-  messages.splice(0, messages.length, ...chosenHistory.conversation);
+  (currentConversationID.value);
+  let chosenHistory: History;
+  chatHistories.messageHistory.forEach((history, index) => {
+    if (history.historyId == currentConversationID.value) {
+      messages.splice(0, messages.length, ...history.conversation);
+    }
+  })
   scrollToBottom();
 };
 
@@ -123,6 +133,7 @@ const sendMessage = async () => {
         new Date().toLocaleTimeString(),
         availId
       );
+      currentConversationID.value = availId;
       userMessage.setHistoryTimestamp(generateTimestamp());
     } else {
       userMessage = new Message(
@@ -133,7 +144,7 @@ const sendMessage = async () => {
         currentConversationID.value
       );
     }
-
+    (userMessage);
     messages.push(userMessage);
     const currentTopic = filteredStr;
 
@@ -152,29 +163,49 @@ const sendMessage = async () => {
     // Clear input
     userInput.value = "";
     if (method.value !== "GPT") {
-      // Fetch response from backend
-      const response = await api.post(
-        "https://iridescent-jalebi-788066.netlify.app/.netlify/functions/endpoint/getmessage",
-        request
-      );
-      // Unload response from api
-      if (response.data.message === "200") {
-        botFullResponse.value = response.data.botResponse.response + "\n\n";
-        botFullResponse.value += helpfulResponse[random()];
-      } else {
-        // const confusedText = confusedResponse[random()];
-        // const choiceArr = response.data.botResponse.response.split("<-|->");
-        // botFullResponse.value = confusedText;
-        // choiceArr.forEach((choice: string, index: number) => {
-        //   if (choice !== "") {
-        //     botFullResponse.value += index + 1 + ". " + choice + "\n";
-        //   }
-        // });
-        botFullResponse.value = response.data.botResponse.response;
-        botFullResponse.value +=
-          "Please rewrite the question if you desire to choose from the above!";
+      try {
+        // Fetch response from backend
+        const response = await api.post(
+          "https://iridescent-jalebi-788066.netlify.app/.netlify/functions/endpoint/getmessage",
+          request
+        );
+        // Unload response from api
+        if (response.data.message === "200") {
+          botFullResponse.value = response.data.botResponse.response + "\n\n";
+          botFullResponse.value += helpfulResponse[random()];
+        } else {
+          // const confusedText = confusedResponse[random()];
+          // const choiceArr = response.data.botResponse.response.split("<-|->");
+          // botFullResponse.value = confusedText;
+          // choiceArr.forEach((choice: string, index: number) => {
+          //   if (choice !== "") {
+          //     botFullResponse.value += index + 1 + ". " + choice + "\n";
+          //   }
+          // });
+          botFullResponse.value = response.data.botResponse.response;
+          botFullResponse.value +=
+            "Please rewrite the question if you desire to choose from the above!";
+        }
+        botFullResponse.value = botFullResponse.value.replace(/\n/g, "<br>");
+      } catch (error) {
+        const axiosError = error as AxiosError;
+        if (axiosError.response) {
+          switch (axiosError.response.status) {
+            case 502:
+              let i = 5;
+              const intervalId = setInterval(() => {
+                Notify.create({
+                  message: `Something wrong with our end! Please come back later!`,
+                });
+                i--;
+                if (i < 1) {
+                  clearInterval(intervalId);
+                }
+              }, 1000);
+              break;
+          }
+        }
       }
-      botFullResponse.value = botFullResponse.value.replace(/\n/g, "<br>");
     } else {
       const response = await api.post(
         "https://tubes3stima.pythonanywhere.com/completion",
@@ -304,7 +335,7 @@ onMounted(() => {
           />
         </div>
         <span
-          class="text-sm-caption text-black tw-absolute tw-top-1 tw-right-2"
+          class="text-sm-caption text-black tw-absolute tw-top-1 tw-left-2"
         >
           Copyright by 666
         </span>
@@ -313,7 +344,7 @@ onMounted(() => {
     <q-splitter v-model="splitter" :separator-style="{ display: 'none' }">
       <template v-slot:before>
         <div
-          class="q-pa-md tw-h-screen tw-max-w-lg"
+          class="q-pa-md tw-h-screen tw-max-w-lg tw-pr-1"
           style="border-right: solid 2px #f46197"
         >
           <div class="text-h4 q-mb-md text-accent tw-mt-2">Chat History</div>
@@ -396,7 +427,7 @@ onMounted(() => {
               :disable="isResponding"
             />
           </div>
-          <span class="text-caption text-white tw-absolute tw-top-0 tw-right-4">
+          <span class="text-caption text-white tw-absolute tw-top-0 tw-left-4">
             Copyright by 666
           </span>
         </div>
