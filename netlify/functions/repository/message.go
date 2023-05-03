@@ -12,8 +12,10 @@ func InsertUserMessage(db *sql.DB, newMessage structs.Request) (error) {
     return err.Err()
   }
 
+  messageID := CountUserMessage(db)
+
   // Add to HistoryMessage table
-  err = db.QueryRow("INSERT INTO HistoryMessage VALUES(?, ?)", newMessage.HistoryId, newMessage.Id)
+  err = db.QueryRow("INSERT INTO HistoryMessage VALUES(?, ?)", newMessage.HistoryId, messageID)
 
   return err.Err()
 }
@@ -53,5 +55,23 @@ func GetUserMessageByID(db *sql.DB, userQuestionID int64) (results []structs.Mes
   }
 
   return
+}
+
+func CountUserMessage(db *sql.DB) int {
+  rows, err := db.Query("SELECT * FROM UserMessage")
+
+  if err != nil {
+    panic(err)
+  }
+
+  defer rows.Close()
+
+  var count = 0
+
+  for rows.Next() {
+    count++
+  }
+
+  return count
 }
 
