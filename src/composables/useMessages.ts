@@ -1,15 +1,15 @@
 import { Message } from "src/constants/message";
-import { MessageHistory } from "src/constants";
+import { MessageHistory, HistoryPayload } from "src/constants";
 // import { allHistory } from "src/constants/history";
 
 export const useMessages = ({
   chatHistories,
 }: {
-  chatHistories?: MessageHistory;
+  chatHistories?: HistoryPayload;
 } = {}) => {
   const generateMessageId = () => {
     if (chatHistories) {
-      const historyIds = chatHistories.messageHistory.map(
+      const historyIds = chatHistories.historyCollection.map(
         (history) => history.historyId
       );
       historyIds.sort((a, b) => a - b);
@@ -26,19 +26,19 @@ export const useMessages = ({
     }
   };
 
-  const updateHistory = (historyId: number, message: Message) => {
-    if (chatHistories) {
-      chatHistories.messageHistory.forEach((history, index) => {
-        if (history.historyId === historyId) {
-          history.conversation.push(message);
-          return;
-        }
-      });
-    }
-  };
+  // const updateHistory = (historyId: number, message: Message) => {
+  //   if (chatHistories) {
+  //     chatHistories.messageHistory.forEach((history, index) => {
+  //       if (history.historyId === historyId) {
+  //         history.conversation.push(message);
+  //         return;
+  //       }
+  //     });
+  //   }
+  // };
 
   return {
     generateMessageId,
-    updateHistory,
+    // updateHistory,
   };
 };

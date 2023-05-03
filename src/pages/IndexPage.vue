@@ -5,6 +5,8 @@ import {
   History,
   Request,
   MessageHistory,
+  HistoryRequest,
+  HistoryPayload,
 } from "src/constants";
 import { ref, Ref, watch, reactive, onMounted, computed } from "vue";
 import { QScrollArea, useQuasar, Notify } from "quasar";
@@ -42,41 +44,39 @@ const scrollToBottom = () => {
 const currentConversationID = ref(0);
 
 // Perform fetching data to fill this array
-const chatHistories: MessageHistory = reactive({
-  messageHistory: [],
+const chatHistories: HistoryPayload = reactive({
+  historyCollection: [],
 });
+
 const messages: MessageInterface[] = reactive([]);
 
-const fetchHistories = async () => {
+// Fetch all history topic & id only
+const fetchAllTopic = async () => {
   $q.loading.show({
     message: "Fetching important resouces. Hang on...",
   });
   const response = await api.get(
-    "https://iridescent-jalebi-788066.netlify.app/.netlify/functions/endpoint/history"
+    "https://iridescent-jalebi-788066.netlify.app/.netlify/functions/endpoint/history-topic"
   );
-  const fetchedMessageHistory: [] = response.data.historyMessage.messageHistory;
-  fetchedMessageHistory.forEach((ele: History, index) => {
-    const arrayOfConversation: Array<MessageInterface> = [];
-    ele.conversation.forEach((messageJSON, index) => {
-      const message = new Message(
-        messageJSON.id,
-        true,
-        messageJSON.text,
-        messageJSON.sentTime,
-        messageJSON.historyId
-      );
-      message.setResponse(messageJSON.response, 200);
-      message.setResponseStatus(true);
-      arrayOfConversation.push(message);
-    });
-    const history: History = {
-      historyId: ele.historyId,
-      topic: ele.topic,
-      conversation: arrayOfConversation,
-    };
-    chatHistories.messageHistory.push(history);
+  const fetchedHistoryTopic: [] = response.data.historyPayload;
+  fetchedHistoryTopic.forEach((ele: HistoryRequest, index) => {
+    chatHistories.historyCollection.push(ele);
   });
-  // chatHistories.messageHistory.reverse();
+  $q.loading.hide();
+};
+
+const fetchHistory = async () => {
+  $q.loading.show({
+    message: "Loading chat histories. Hang on...",
+  });
+  const response = await api.post(
+    "https://iridescent-jalebi-788066.netlify.app/.netlify/functions/endpoint/history",
+    { id: currentConversationID.value }
+  );
+  messages.splice(0, messages.length, ...response.data.historyMessage.conversation);
+  messages.forEach((message, index) => {
+    message.text = message.text.replace(/\n/g, "<br>");
+  });
   $q.loading.hide();
 };
 
@@ -97,27 +97,20 @@ const method = ref("KMP");
 
 const newChat = () => {
   botGreetings.value = greetings[random()];
-  currentConversationID.value = chatHistories.messageHistory.length + 1;
+  currentConversationID.value = chatHistories.historyCollection.length + 1;
   messages.splice(0, messages.length);
 };
 
-const switchConversation = () => {
+const switchConversation = async () => {
   // replace the current array to chosen history conversation
-  chatHistories.messageHistory.forEach((history, index) => {
-    if (history.historyId == currentConversationID.value) {
-      messages.splice(0, messages.length, ...history.conversation);
-      messages.forEach((message, index) => {
-        message.text = message.text.replace(/\n/g, "<br>");
-      })
-    }
-  })
+  await fetchHistory();
   scrollToBottom();
 };
 
 const sendMessage = async () => {
   if (!isResponding.value) {
     const filteredStr = userInput.value.replace(/\n/g, "");
-    const { generateMessageId, updateHistory } = useMessages({ chatHistories });
+    const { generateMessageId } = useMessages({ chatHistories });
     isResponding.value = true;
     scrollToBottom();
     let userMessage: Message;
@@ -142,7 +135,7 @@ const sendMessage = async () => {
       );
     }
     messages.push(userMessage);
-    const currentTopic = filteredStr;
+    // const currentTopic = filteredStr;
 
     // Send request to backend
     const request: Request = {
@@ -221,17 +214,17 @@ const sendMessage = async () => {
     botResponse.value = "";
     isResponding.value = false;
 
-    if (messages.length === 1) {
-      const currentMessages = messages.slice();
-      const newHistory: History = {
-        historyId: generateMessageId(),
-        topic: currentTopic,
-        conversation: currentMessages,
-      };
-      chatHistories.messageHistory.push(newHistory);
-    } else {
-      updateHistory(currentConversationID.value, userMessage);
-    }
+    // if (messages.length === 1) {
+    //   const currentMessages = messages.slice();
+    //   const newHistory: History = {
+    //     historyId: generateMessageId(),
+    //     topic: currentTopic,
+    //     conversation: currentMessages,
+    //   };
+    //   chatHistories.messageHistory.push(newHistory);
+    // } else {
+    //   updateHistory(currentConversationID.value, userMessage);
+    // }
   }
 };
 
@@ -241,7 +234,7 @@ watch([messages, currentConversationID], () => {
 
 onMounted(async () => {
   scrollToBottom();
-  await fetchHistories();
+  // await fetchAllTopic();
   const { generateMessageId } = useMessages({ chatHistories });
   currentConversationID.value = generateMessageId();
 });
@@ -276,7 +269,7 @@ onMounted(async () => {
             active-color="white"
           >
             <template
-              v-for="history in chatHistories.messageHistory"
+              v-for="history in chatHistories.historyCollection"
               :key="history"
             >
               <q-tab
@@ -288,11 +281,11 @@ onMounted(async () => {
               >
                 <div class="tw-flex tw-items-center">
                   <q-icon name="chat" class="tw-pr-2" />
-                  <template v-if="history.topic.length > 15">
-                    <span>{{ history.topic.substring(0, 15) }}...</span>
+                  <template v-if="history.historyTopic.length > 15">
+                    <span>{{ history.historyTopic.substring(0, 15) }}...</span>
                   </template>
                   <template v-else>
-                    <span>{{ history.topic.substring(0, 15) }}</span>
+                    <span>{{ history.historyTopic.substring(0, 15) }}</span>
                   </template>
                 </div>
               </q-tab>
@@ -332,9 +325,7 @@ onMounted(async () => {
             class="-tw-mt-10"
           />
         </div>
-        <span
-          class="text-sm-caption text-black tw-absolute tw-top-1 tw-left-2"
-        >
+        <span class="text-sm-caption text-black tw-absolute tw-top-1 tw-left-2">
           Copyright by 666
         </span>
       </div>
@@ -369,7 +360,7 @@ onMounted(async () => {
               active-color="white"
             >
               <template
-                v-for="history in chatHistories.messageHistory"
+                v-for="history in chatHistories.historyCollection"
                 :key="history"
               >
                 <q-tab
@@ -381,11 +372,11 @@ onMounted(async () => {
                 >
                   <div class="tw-flex tw-items-center">
                     <q-icon name="chat" class="tw-pr-2" />
-                    <template v-if="history.topic.length > 20">
-                      <span>{{ history.topic.substring(0, 20) }}...</span>
+                    <template v-if="history.historyTopic.length > 20">
+                      <span>{{ history.historyTopic.substring(0, 20) }}...</span>
                     </template>
                     <template v-else>
-                      <span>{{ history.topic.substring(0, 20) }}</span>
+                      <span>{{ history.historyTopic.substring(0, 20) }}</span>
                     </template>
                   </div>
                 </q-tab>
