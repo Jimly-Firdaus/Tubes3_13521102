@@ -70,6 +70,8 @@ func GetUserMessageByID(db *sql.DB, userQuestionID int64) (results []structs.Mes
     if err != nil {
       panic(err)
     }
+    
+    defer row.Close()
 
     for row.Next() {
       row.Scan(&userMessage.HistoryId);

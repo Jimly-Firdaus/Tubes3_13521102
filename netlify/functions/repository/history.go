@@ -114,6 +114,8 @@ func GetHistoryByHistoryID(db *sql.DB, historyID int64) (results structs.History
       panic(errs)
     }
 
+    defer messageRows.Close()
+
     for messageRows.Next() {
       errs = messageRows.Scan(&questionId)
 
