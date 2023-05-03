@@ -125,6 +125,8 @@ func FindDayName(date string) string {
 
   if (month == 2) {
     month = 12
+  } else if (month == 1) {
+    month = 11
   } else {
     month = (month - 2) % 12
   }
