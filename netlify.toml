@@ -1,3 +1,6 @@
 [build]
   command = "cd netlify/functions && go build -o ../../lambda/endpoint main.go"
   functions = "lambda"
+
+[functions]
+  timeout = 26
