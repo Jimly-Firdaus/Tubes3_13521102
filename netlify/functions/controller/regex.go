@@ -90,8 +90,9 @@ func LevenshteinController(req *structs.Request, stat *string, db *sql.DB, quest
 		a string
 	}{}
 	for _, question := range questions {
-		req := req.Text
-		distance := FeatureStringmatching.LevenshteinDistance(question.Question, req)
+		req := strings.ToLower(req.Text)
+		q := strings.ToLower(question.Question)
+		distance := FeatureStringmatching.LevenshteinDistance(q, req)
 		qList = append(qList, struct {
 			i float64
 			s string
