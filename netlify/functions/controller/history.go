@@ -12,7 +12,10 @@ import (
 
 func GetHistoryByID(request events.APIGatewayProxyRequest, db *sql.DB) (*events.APIGatewayProxyResponse, error) {
 	// Parse the request body into a Request struct
-	var hid int64
+	type Hid struct {
+		id int64
+	}
+	var hid Hid
 	var status string
 	if err := json.Unmarshal([]byte(request.Body), &hid); err != nil {
 		return &events.APIGatewayProxyResponse{
@@ -22,9 +25,9 @@ func GetHistoryByID(request events.APIGatewayProxyRequest, db *sql.DB) (*events.
 	}
 
 	// Use the message and method fields in the Request struct
-	fmt.Println(hid)
+	fmt.Println(hid.id)
 	status = "200"
-	hist, err := repository.GetHistoryByHistoryID(db, hid)
+	hist, err := repository.GetHistoryByHistoryID(db, hid.id)
 	// Parameter jadi struct.
 	// TO DO : Masukin database
 	// Write a response back to the client
