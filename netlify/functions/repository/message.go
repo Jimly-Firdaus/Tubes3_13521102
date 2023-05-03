@@ -12,14 +12,17 @@ func InsertUserMessage(db *sql.DB, newMessage structs.Request) (error) {
     return err.Err()
   }
 
-  messageID := CountUserMessage(db)
-
-  // Add to HistoryMessage table
-  err = db.QueryRow("INSERT INTO HistoryMessage VALUES(?, ?)", newMessage.HistoryId, messageID)
-
-  return err.Err()
+  return nil
 }
 
+func InsertHistoryMessage(db *sql.DB, historyID int) (error) {
+    messageID := CountUserMessage(db)
+
+    // Add to HistoryMessage table
+    err := db.QueryRow("INSERT INTO HistoryMessage VALUES(?, ?)", historyID, messageID)
+
+    return err.Err()
+}
 
 func GetUserMessageByID(db *sql.DB, userQuestionID int64) (results []structs.Message, err error) {
   rows, err := db.Query("SELECT * FROM UserMessage WHERE userQuestionID = ?", userQuestionID)

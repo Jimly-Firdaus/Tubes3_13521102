@@ -208,9 +208,15 @@ func GetResponse(req *structs.Request, index int, stat *string, db *sql.DB) {
 
 	// First we check if the historyID is already in database or not
 
-	if repository.CheckHistoryExist(db, int(req.HistoryId)) {
+	if (repository.CheckHistoryExist(db, int(req.HistoryId)) || req.HistoryTimeStamp == "") {
 		// If history already exist then we only need to add to table UserMessage and HistoryMessage
 		err := repository.InsertUserMessage(db, *req)
+
+		if err != nil {
+			panic(err)
+		}
+
+		err = repository.InsertHistoryMessage(db, int(req.HistoryId))
 
 		if err != nil {
 			panic(err)
@@ -241,6 +247,12 @@ func GetResponse(req *structs.Request, index int, stat *string, db *sql.DB) {
 		// Also don't forget to insert row to userMessage table
 
 		err = repository.InsertUserMessage(db, *req)
+
+		if err != nil {
+			panic(err)
+		}
+
+		err = repository.InsertHistoryMessage(db, int(req.HistoryId))
 
 		if err != nil {
 			panic(err)
