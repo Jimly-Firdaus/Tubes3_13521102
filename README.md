@@ -24,6 +24,7 @@ Backend webserver: [Netlify](https://iridescent-jalebi-788066.netlify.app)
 
 # Web View
 
+![WebView](https://user-images.githubusercontent.com/72639506/236265283-79b45b5c-ac11-485c-b5f0-1af227f5b762.png)
 
 
 # How to run locally (just front-end side)
