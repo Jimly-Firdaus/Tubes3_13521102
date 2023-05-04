@@ -16,25 +16,21 @@ import (
 // Function to get only pertanyaan and jawaban from string
 func GetPertanyaanJawaban(req string) []string {
 	// Replacing unnecessary string value with null
-	substr1 := "tambahkan pertanyaan "
-	substr2 := "dengan jawaban "
-	newStr := strings.Replace(req, substr1, "", 1)
-	newStr = strings.Replace(newStr, substr2, "", 1)
+	substrings := strings.Split(req, "dengan")
 
-	result := strings.FieldsFunc(newStr,
-		func(c rune) bool {
-			return c == ' '
-		})
+	substrings[0] = strings.Replace(substrings[0], "Tambahkan pertanyaan ", "", 1)
+	substrings[0] = strings.Replace(substrings[0], "tambahkan pertanyaan ", "", 1)
+	substrings[1] = strings.Replace(substrings[1], "jawaban ", "", 1)
 
-	return result
+	return substrings
 }
 
 // Function to get only pertanyaan from string
 func GetPertanyaan(req string) string {
 	// Replacing unnecessary string value with null
-	substr1 := "hapus pertanyaan "
 
-	newStr := strings.Replace(req, substr1, "", 1)
+	newStr := strings.Replace(req, "hapus pertanyaan ", "", 1)
+	newStr = strings.Replace(newStr, "Hapus pertanyaan ", "", 1)
 
 	return newStr
 }
@@ -154,7 +150,7 @@ func GetResponse(req *structs.Request, index int, stat *string, db *sql.DB) {
 	// Fitur Tambah Pertanyaan
 	if index == 1 {
 		// Get only question and answer from string
-		result := GetPertanyaanJawaban(strings.ToLower(req.Text))
+		result := GetPertanyaanJawaban(req.Text)
 
 		question := result[0]
 		answer := result[1]
@@ -174,7 +170,7 @@ func GetResponse(req *structs.Request, index int, stat *string, db *sql.DB) {
 
 	} else if index == 2 { // Fitur Hapus Pertanyaan
 		// Get only question from string
-		question := GetPertanyaan(strings.ToLower(req.Text))
+		question := GetPertanyaan(req.Text)
 
 		// Delete question from table
 		err := repository.DeleteBotResponse(db, question)
