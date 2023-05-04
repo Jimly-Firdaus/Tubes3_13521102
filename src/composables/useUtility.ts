@@ -1,5 +1,4 @@
 import { Ref, WritableComputedRef } from "vue";
-import { Configuration, OpenAIApi } from "openai";
 
 export const useUtility = ({
   startNum,
