@@ -12,7 +12,6 @@ import { ref, Ref, watch, reactive, onMounted, computed } from "vue";
 import { QScrollArea, useQuasar, Notify } from "quasar";
 import {
   greetings,
-  confusedResponse,
   helpfulResponse,
 } from "src/constants/history";
 import { useUtility } from "src/composables/useUtility";
