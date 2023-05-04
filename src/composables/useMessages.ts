@@ -1,6 +1,4 @@
-import { Message } from "src/constants/message";
-import { MessageHistory, HistoryPayload } from "src/constants";
-// import { allHistory } from "src/constants/history";
+import { HistoryPayload } from "src/constants";
 
 export const useMessages = ({
   chatHistories,
