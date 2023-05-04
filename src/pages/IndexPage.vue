@@ -196,7 +196,7 @@ const sendMessage = async () => {
         const axiosError = error as AxiosError;
         if (axiosError.response) {
           switch (axiosError.response.status) {
-            case 502:
+            default:
               let i = 5;
               const intervalId = setInterval(() => {
                 Notify.create({
