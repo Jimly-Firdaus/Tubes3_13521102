@@ -30,7 +30,7 @@ Backend webserver: [Netlify](https://iridescent-jalebi-788066.netlify.app)
 
 To run this project locally you will need to install:
 
-- node
+- node (version ^18 or ^16 or ^14.19, preferrable on node 16)
 
 Clone this repository. Move to the root of this project then,
 
