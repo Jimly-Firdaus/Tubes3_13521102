@@ -6,7 +6,7 @@ import (
 )
 
 func GetAllHistory(db *sql.DB) (results structs.HistoryPayload, err error) {
-	rows, err := db.Query("SELECT historyID, historyTitle FROM History")
+	rows, err := db.Query("SELECT historyID, historyTitle FROM History ORDER BY createTime ASC")
 
 	if err != nil {
 		panic(err)
