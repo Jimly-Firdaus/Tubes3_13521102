@@ -1,4 +1,5 @@
 {
+  "doubleQuotes": true,
   "tabWidth": 2,
   "useTabs": false,
   "semi": true,
