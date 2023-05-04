@@ -320,11 +320,7 @@ func GetResponse(req *structs.Request, text string, index int, stat *string, db 
 
 		equation := FilterEquation(strings.ToLower(text))
 		// Get expression result
-		result, err := FeatureCalculator.CalculateExpression(equation)
-
-		if err != nil {
-			panic(err)
-		}
+		result, _ := FeatureCalculator.CalculateExpression(equation)
 
 		// Set bot response
 		response = result
