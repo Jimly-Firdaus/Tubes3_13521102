@@ -58,7 +58,6 @@ const fetchAllTopic = async () => {
   const response = await api.get(
     "https://iridescent-jalebi-788066.netlify.app/.netlify/functions/endpoint/history-topic"
   );
-  // console.log(response.data);
   if (response.data.historyPayload.HistoryCollection !== null) {
     const fetchedHistoryTopic: FetchedHistoryTopic[] = response.data.historyPayload.HistoryCollection;
     fetchedHistoryTopic.forEach((ele, index) => {
@@ -71,7 +70,6 @@ const fetchAllTopic = async () => {
   } else{
     chatHistories.historyCollection = [];
   }
-  // console.log(chatHistories.historyCollection);
   $q.loading.hide();
 };
 
@@ -79,12 +77,10 @@ const fetchHistory = async () => {
   $q.loading.show({
     message: "Loading chat histories. Hang on...",
   });
-  // console.log(currentConversationID.value);
   const response = await api.post(
     "https://iridescent-jalebi-788066.netlify.app/.netlify/functions/endpoint/history",
     { id: currentConversationID.value }
   );
-  console.log(response.data);
   const conversation: [] = response.data.history.conversation;
   messages.splice(0, messages.length);
   conversation.forEach((message: MessagePayload, index) => {
@@ -97,13 +93,11 @@ const fetchHistory = async () => {
     )
     tempMessage.setResponse(message.response, 200);
     tempMessage.setResponseStatus(true);
-    console.log(tempMessage);
     messages.push(tempMessage);
   }) 
   messages.forEach((message, index) => {
     message.text = message.text.replace(/\n/g, "<br>");
   });
-  console.log(messages);
   $q.loading.hide();
 };
 
@@ -131,7 +125,6 @@ const newChat = () => {
 };
 
 const switchConversation = async () => {
-  // console.log(currentConversationID.value);
   // replace the current array to chosen history conversation
   await fetchHistory();
   scrollToBottom();
@@ -168,7 +161,6 @@ const sendMessage = async () => {
       );
     }
     messages.push(userMessage);
-    // const currentTopic = filteredStr;
 
     // Send request to backend
     const request: Request = {
@@ -196,14 +188,6 @@ const sendMessage = async () => {
           botFullResponse.value = response.data.botResponse.response + "\n\n";
           botFullResponse.value += helpfulResponse[random()];
         } else {
-          // const confusedText = confusedResponse[random()];
-          // const choiceArr = response.data.botResponse.response.split("<-|->");
-          // botFullResponse.value = confusedText;
-          // choiceArr.forEach((choice: string, index: number) => {
-          //   if (choice !== "") {
-          //     botFullResponse.value += index + 1 + ". " + choice + "\n";
-          //   }
-          // });
           botFullResponse.value = response.data.botResponse.response;
           botFullResponse.value +=
             "Please rewrite the question if you desire to choose from the above!";
@@ -247,18 +231,6 @@ const sendMessage = async () => {
     messages[messages.length - 1].setResponseStatus(true);
     botResponse.value = "";
     isResponding.value = false;
-
-    // if (messages.length === 1) {
-    //   const currentMessages = messages.slice();
-    //   const newHistory: History = {
-    //     historyId: generateMessageId(),
-    //     topic: currentTopic,
-    //     conversation: currentMessages,
-    //   };
-    //   chatHistories.messageHistory.push(newHistory);
-    // } else {
-    //   updateHistory(currentConversationID.value, userMessage);
-    // }
   }
 };
 
