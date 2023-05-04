@@ -43,7 +43,7 @@ func applyOp(a float64, b float64, op string) (string, error) {
     return strconv.FormatFloat(a * b, 'f', 2, 64), nil
   case "/":
     if (b == 0) {
-      return "Division by zero", fmt.Errorf("division by zero")
+      return "Error division by zero", fmt.Errorf("division by zero")
     }
     return strconv.FormatFloat(a / b, 'f', 2, 64), nil
   case "^":
