@@ -46,18 +46,3 @@ func Min(a, b int) int {
 	}
 	return b
 }
-
-// tester
-// func main() {
-// 	var text, pattern string
-// 	text = "Apa Ibukota Indonesia?"
-// 	pattern = "Ibukota Indo"
-// 	fmt.Println("Text:", text)
-// 	fmt.Println("Pattern:", pattern)
-// 	posn := BmMatch(text, pattern)
-// 	if posn == -1 {
-// 		fmt.Println("Pattern not found")
-// 	} else {
-// 		fmt.Println("Pattern starts at posn", posn)
-// 	}
-// }
