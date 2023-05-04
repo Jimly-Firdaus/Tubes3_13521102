@@ -10,6 +10,7 @@ export interface Message {
   id: number;
   text: string;
   response: string;
+  sent: boolean;
   sentTime: string;
   historyId: number;
   historyTimestamp: string;
@@ -51,8 +52,8 @@ export interface Request {
 }
 
 export interface MessageInterface extends Message {
-  response: string;
   responseStatusCode: number;
+  responded: boolean;
 
   getId(): number;
   getStatus(): boolean;
@@ -62,6 +63,7 @@ export interface MessageInterface extends Message {
   getSentTime(): string;
   getResponseStatus(): boolean;
   getHistoryTimestamp(): string;
+  getHistoryId(): number;
   setResponseStatus(status: boolean): void;
   setResponse(text: string, statusCode: number): void;
   setHistoryTimestamp(timestamp: string): void;
@@ -74,4 +76,9 @@ export interface HistoryRequest {
 
 export interface HistoryPayload {
   historyCollection: Array<HistoryRequest>;
+}
+
+export interface FetchedHistoryTopic {
+  HistoryID: number;
+  HistoryTopic: string;
 }

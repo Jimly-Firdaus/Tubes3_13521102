@@ -2,11 +2,11 @@
 import { Message } from "src/constants/message";
 import {
   MessageInterface,
-  History,
+  Message as MessagePayload,
   Request,
-  MessageHistory,
   HistoryRequest,
   HistoryPayload,
+  FetchedHistoryTopic
 } from "src/constants";
 import { ref, Ref, watch, reactive, onMounted, computed } from "vue";
 import { QScrollArea, useQuasar, Notify } from "quasar";
@@ -58,10 +58,20 @@ const fetchAllTopic = async () => {
   const response = await api.get(
     "https://iridescent-jalebi-788066.netlify.app/.netlify/functions/endpoint/history-topic"
   );
-  const fetchedHistoryTopic: [] = response.data.historyPayload;
-  fetchedHistoryTopic.forEach((ele: HistoryRequest, index) => {
-    chatHistories.historyCollection.push(ele);
-  });
+  // console.log(response.data);
+  if (response.data.historyPayload.HistoryCollection !== null) {
+    const fetchedHistoryTopic: FetchedHistoryTopic[] = response.data.historyPayload.HistoryCollection;
+    fetchedHistoryTopic.forEach((ele, index) => {
+      const historyTopic: HistoryRequest = {
+        historyId: ele.HistoryID,
+        historyTopic: ele.HistoryTopic,
+      }
+      chatHistories.historyCollection.push(historyTopic);
+    });
+  } else{
+    chatHistories.historyCollection = [];
+  }
+  // console.log(chatHistories.historyCollection);
   $q.loading.hide();
 };
 
@@ -69,14 +79,31 @@ const fetchHistory = async () => {
   $q.loading.show({
     message: "Loading chat histories. Hang on...",
   });
+  // console.log(currentConversationID.value);
   const response = await api.post(
     "https://iridescent-jalebi-788066.netlify.app/.netlify/functions/endpoint/history",
     { id: currentConversationID.value }
   );
-  messages.splice(0, messages.length, ...response.data.historyMessage.conversation);
+  console.log(response.data);
+  const conversation: [] = response.data.history.conversation;
+  messages.splice(0, messages.length);
+  conversation.forEach((message: MessagePayload, index) => {
+    const tempMessage = new Message(
+      message.id,
+      message.sent,
+      message.text,
+      message.sentTime,
+      message.historyId
+    )
+    tempMessage.setResponse(message.response, 200);
+    tempMessage.setResponseStatus(true);
+    console.log(tempMessage);
+    messages.push(tempMessage);
+  }) 
   messages.forEach((message, index) => {
     message.text = message.text.replace(/\n/g, "<br>");
   });
+  console.log(messages);
   $q.loading.hide();
 };
 
@@ -84,6 +111,7 @@ const userInput: Ref<string> = ref("");
 const botResponse: Ref<string> = ref("");
 const botFullResponse: Ref<string> = ref("");
 const isResponding: Ref<boolean> = ref(false);
+const showGPTinfo: Ref<boolean> = ref(true);
 
 const { animateMessage, random, generateTimestamp } = useUtility({
   startNum: 0,
@@ -96,12 +124,14 @@ const botGreetings = ref(greetings[random()]);
 const method = ref("KMP");
 
 const newChat = () => {
+  showGPTinfo.value = true;
   botGreetings.value = greetings[random()];
   currentConversationID.value = chatHistories.historyCollection.length + 1;
   messages.splice(0, messages.length);
 };
 
 const switchConversation = async () => {
+  // console.log(currentConversationID.value);
   // replace the current array to chosen history conversation
   await fetchHistory();
   scrollToBottom();
@@ -109,6 +139,9 @@ const switchConversation = async () => {
 
 const sendMessage = async () => {
   if (!isResponding.value) {
+    if (showGPTinfo.value) {
+      showGPTinfo.value = false;
+    }
     const filteredStr = userInput.value.replace(/\n/g, "");
     const { generateMessageId } = useMessages({ chatHistories });
     isResponding.value = true;
@@ -204,7 +237,8 @@ const sendMessage = async () => {
         }
       );
       if (response !== undefined) {
-        botFullResponse.value = response.data;
+        botFullResponse.value = response.data + "\n\n";
+        botFullResponse.value += helpfulResponse[random()];
       }
     }
 
@@ -234,7 +268,7 @@ watch([messages, currentConversationID], () => {
 
 onMounted(async () => {
   scrollToBottom();
-  // await fetchAllTopic();
+  await fetchAllTopic();
   const { generateMessageId } = useMessages({ chatHistories });
   currentConversationID.value = generateMessageId();
 });
@@ -423,11 +457,6 @@ onMounted(async () => {
       </template>
 
       <template v-slot:after>
-        <template v-if="method === 'GPT'">
-          <h6 class="tw-absolute tw-right-2 text-warning">
-            Please note that GPT Mode will not be saved to our database!
-          </h6>
-        </template>
         <div
           style="width: 100%"
           class="tw-h-screen tw-w-flex tw-flex-col tw-justify-end"
@@ -446,6 +475,13 @@ onMounted(async () => {
             class="tw-px-5 chat-area"
             ref="scrollArea"
           >
+            <template v-if="method === 'GPT' && showGPTinfo">
+              <h6 class="tw-absolute text-warning tw-text-center tw-w-full tw-top-52">
+                Welcome to GPT Mode!
+                <br>
+                Please note that GPT Mode will not be saved to our database!
+              </h6>
+            </template>
             <div class="tw-w-full">
               <q-chat-message
                 name="BOT"
@@ -455,9 +491,9 @@ onMounted(async () => {
               >
                 <div class="text-lg-body">{{ botGreetings }}</div>
               </q-chat-message>
-              <div v-for="message in messages" :key="message.getId()">
+              <div v-for="message in messages" :key="message.id">
                 <q-chat-message
-                  :sent="message.getStatus()"
+                  :sent="true"
                   text-color="white"
                   bg-color="green-1"
                   :avatar="userAvatar"

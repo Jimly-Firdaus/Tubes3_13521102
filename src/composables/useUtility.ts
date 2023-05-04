@@ -15,7 +15,7 @@ export const useUtility = ({
   /**
    * Wait for duration in millis
    */
-  const wait = () => new Promise((resolve) => setTimeout(resolve, duration));
+  const wait = () => new Promise((resolve) => setTimeout(resolve, random() + 17));
 
   /**
    * Animate bot message per word to full message
