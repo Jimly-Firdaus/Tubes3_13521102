@@ -138,7 +138,7 @@ func CalculateExpression(expression string) (string, error) {
         hasil, err := applyOp(StringtoFloat(secondNumber), StringtoFloat(firstNumber), operator)
 
         if (err != nil) {
-          return "Invalid Syntax", nil
+          return hasil, nil
         }
 
         valueStack.Push(hasil)
@@ -188,7 +188,7 @@ func CalculateExpression(expression string) (string, error) {
         hasil, err := applyOp(StringtoFloat(secondNumber), StringtoFloat(firstNumber), operator)
 
         if (err != nil) {
-          return "Invalid Syntax", nil
+          return hasil, nil
         }
 
         valueStack.Push(hasil)
@@ -225,7 +225,7 @@ func CalculateExpression(expression string) (string, error) {
     hasil, err := applyOp(StringtoFloat(secondNumber), StringtoFloat(firstNumber), operator)
 
     if (err != nil) {
-      return "Invalid Syntax", nil
+      return hasil, nil
     }
     valueStack.Push(hasil)
   }
