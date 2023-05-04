@@ -160,6 +160,7 @@ const sendMessage = async () => {
       );
     }
     messages.push(userMessage);
+    const currentTopic = filteredStr;
 
     // Send request to backend
     const request: Request = {
@@ -230,6 +231,14 @@ const sendMessage = async () => {
     messages[messages.length - 1].setResponseStatus(true);
     botResponse.value = "";
     isResponding.value = false;
+
+    if (messages.length === 1) {
+      const newHistory: HistoryRequest = {
+        historyId: generateMessageId(),
+        historyTopic: currentTopic,
+      };
+      chatHistories.historyCollection.push(newHistory);
+    }
   }
 };
 
