@@ -1,41 +1,57 @@
-# Tubes 3 Stima
+# GPT-666
 
-Penerapan String Matching dan Regular Expression dalam Pembuatan ChatGPT Sederhana
+Implementation of String Matching and Regular Expression in the Creation of a Simple ChatGPT.
 
-## Install the dependencies
+# Project Description
+
+In this project, we aim to create a simple ChatGPT using string matching and regular expression techniques. The chatbot will be able to understand and respond to user input by matching it against a predefined set of patterns using the KMP (Knuth-Morris-Pratt) and BM (Boyer-Moore) algorithms.
+
+The KMP algorithm is an efficient string matching algorithm that can find all occurrences of a pattern within a text in linear time. It does this by preprocessing the pattern to create a partial match table, which allows it to avoid unnecessary comparisons when a mismatch occurs.
+
+The BM algorithm is another efficient string matching algorithm that can find all occurrences of a pattern within a text in linear time. It does this by preprocessing the pattern to create two heuristics: the bad character rule and the good suffix rule. These heuristics allow it to skip over large sections of the text when a mismatch occurs.
+
+In addition to string matching, we will also use regular expressions to extract relevant information from user input and generate appropriate responses. Regular expressions are powerful tools for pattern matching and text manipulation that can be used to perform complex tasks with just a few lines of code.
+
+Overall, this project will demonstrate how string matching and regular expression techniques can be used to create a simple yet effective chatbot that can understand and respond to user input in a natural and intuitive manner.
+
+# Platform
+
+This project is deployed at [Github Pages](pemuladigital.github.io/#/)
+
+Repository : [Github Pages Repository](https://github.com/Pemuladigital/Pemuladigital.github.io)
+
+Backend webserver: [Netlify](https://iridescent-jalebi-788066.netlify.app)
+
+# Web View
+
+
+
+# How to run locally (just front-end side)
+
+To run this project locally you will need to install:
+
+- node
+
+Clone this repository. Move to the root of this project then,
+
 ```bash
-yarn
-# or
-npm ci
+npm ci          # for clean install
 ```
 
-### Start the app in development mode (hot-code reloading, error reporting, etc.)
+After that on the root of this repository, run:
+
 ```bash
-quasar dev
+quasar dev      # this will open browser at port 9000
 ```
 
+The development server should start at `localhost:9000` (Do not change the url endpoint!)
 
-### Lint the files
-```bash
-yarn lint
-# or
-npm run lint
-```
+# Additional Information
 
+There are GPT Mode!
 
-### Format the files
-```bash
-yarn format
-# or
-npm run format
-```
+# Author
 
-
-
-### Build the app for production
-```bash
-quasar build
-```
-
-### Customize the configuration
-See [Configuring quasar.config.js](https://v2.quasar.dev/quasar-cli-vite/quasar-config-js).
+- 13521102 Jimly Firdaus
+- 13521127 Marcel Ryan Antony
+- 13521145 Kenneth Dave Bahana
