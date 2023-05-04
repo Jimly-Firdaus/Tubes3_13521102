@@ -19,7 +19,6 @@ func GetPertanyaanJawaban(req string) []string {
 	substrings := strings.Split(req, " dengan ")
 
 	substrings[0] = strings.Replace(substrings[0], "Tambahkan pertanyaan ", "", 1)
-	substrings[0] = strings.Replace(substrings[0], "tambahkan pertanyaan ", "", 1)
 	substrings[1] = strings.Replace(substrings[1], "jawaban ", "", 1)
 
 	return substrings
@@ -29,9 +28,7 @@ func GetPertanyaanJawaban(req string) []string {
 func GetPertanyaan(req string) string {
 	// Replacing unnecessary string value with null
 
-	newStr := strings.Replace(req, "hapus pertanyaan ", "", 1)
-	newStr = strings.Replace(newStr, "Hapus pertanyaan ", "", 1)
-
+	newStr := strings.Replace(req, "Hapus pertanyaan ", "", 1)
 	return newStr
 }
 
@@ -65,6 +62,7 @@ func FilterMessage(req *structs.Request, stat *string, db *sql.DB, regex []*rege
 				// fmt.Printf("String '%s' matches pattern %d\n", text, i+1)
 				answer := GetResponse(req, question, i+1, stat, db)
 				answers = append(answers, answer)
+				break
 			}
 		}
 	}

@@ -32,8 +32,8 @@ var (
 
 func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResponse, error) {
 	patterns := []string{
-		`^(?i)Tambahkan pertanyaan (.*) dengan jawaban (.*)$`,          // Tambah pertanyaan
-		`^(?i)Hapus pertanyaan (.*)$`,                                  // Hapus pertanyaan
+		`^Tambahkan pertanyaan (.*) dengan jawaban (.*)$`,              // Tambah pertanyaan
+		`^Hapus pertanyaan (.*)$`,                                      // Hapus pertanyaan
 		`(?i)^(Hari apa |Hari apakah )?[0-9]{2}/[0-9]{2}/[0-9]{4}\??$`, // Kalendar
 		`(?i)^(Berapakah |Berapa |Hasil dari )?[\d()+\-*\/.^ ]+\??$`,   // Kalkulator
 		`.*`, // Pertanyaan Teks
