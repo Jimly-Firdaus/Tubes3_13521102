@@ -75,6 +75,9 @@ func GetUserMessageByID(c *gin.Context) {
 	defer db.Close()
 
 	userMessage, err := repository.GetMessagesByID(db, userQuestionID)
+	if err != nil {
+		panic(err)
+	}
 	// historyByID, err := repository.GetHistoryByHistoryID(database.db, historyID)
 	c.JSON(http.StatusOK, gin.H{
 		"userMessage": userMessage,
