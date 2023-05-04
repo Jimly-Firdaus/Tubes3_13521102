@@ -296,17 +296,24 @@ func GetResponse(req *structs.Request, text string, index int, stat *string, db 
 		question := GetPertanyaan(text)
 
 		// Delete question from table
-		del, exist := StringMatching(req, question, db, questions)
+		del, exist := ValidateQuestion(req, question, db, questions)
 		if exist {
 			err := repository.DeleteBotResponse(db, del)
 			if err == nil {
 				response = "Pertanyaan " + question + " telah dihapus"
 			}
 		} else {
+			del, exist := LevenshteinValidation(question, db, questions)
+			if exist {
+				err := repository.DeleteBotResponse(db, del)
+				if err == nil {
+					response = "Pertanyaan " + del + " telah dihapus"
+				}
+			} else {
+				response = "Tidak ada pertanyaan " + question + " pada database!"
+			}
 			response = "Tidak ada pertanyaan " + question + " pada database!"
 		}
-
-		// Set bot response
 
 	} else if index == 3 { // Fitur Kalendar
 		// Split unnecessary string value
