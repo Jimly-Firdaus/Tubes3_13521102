@@ -1,7 +1,6 @@
 package main
 
 import (
-	"TUBES3_13521102/netlify/functions/FeatureCalculator"
 	"TUBES3_13521102/netlify/functions/controller"
 	"TUBES3_13521102/netlify/functions/database"
 	"database/sql"
@@ -138,9 +137,9 @@ func main() {
 	// Make the handler available for Remote Procedure Call
 	lambda.Start(handler)
 
-	expression := "(0.5) ^ (-2\n)"
+	// expression := "(0.5) ^ (-2\n)"
 
-	result, _ := FeatureCalculator.CalculateExpression(expression)
+	// result, _ := FeatureCalculator.CalculateExpression(expression)
 
-	fmt.Println(result)
+	// fmt.Println(result)
 }
