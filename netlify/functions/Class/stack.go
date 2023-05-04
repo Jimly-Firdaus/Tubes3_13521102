@@ -18,7 +18,7 @@ func (s* Stack) Size() int {
 // Function to see the top of the stack
 func (s* Stack) Peek() (string, error) {
   if (s.IsEmpty()) {
-    return "", fmt.Errorf("Invalid Syntax")
+    return "Invalid Syntax", fmt.Errorf("Invalid Syntax")
   }
   return s.items[len(s.items)-1], nil
 }
@@ -29,7 +29,7 @@ func (s* Stack) Push(item string) {
 
 func (s* Stack) Pop() (string, error) {
   if (s.IsEmpty()) {
-    return "", fmt.Errorf("Invalid Syntax")
+    return "Invalid Syntax", fmt.Errorf("Invalid Syntax")
   }
   item := s.items[len(s.items)-1]
   // slicing the array
