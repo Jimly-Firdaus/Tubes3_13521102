@@ -55,46 +55,119 @@ func FilterEquation(eq string) string {
 }
 
 func FilterMessage(req *structs.Request, stat *string, db *sql.DB, regex []*regexp.Regexp) {
+	// Split \n if exists in text
+	var answers []string
+	questions := strings.Split(req.Text, "\n")
 	// Filtering required feature for message.
-	for i, reg := range regex {
-		if reg.MatchString(req.Text) {
-			// fmt.Printf("String '%s' matches pattern %d\n", text, i+1)
-			GetResponse(req, i+1, stat, db)
-			return
+	for _, question := range questions {
+		for i, reg := range regex {
+			if reg.MatchString(question) {
+				// fmt.Printf("String '%s' matches pattern %d\n", text, i+1)
+				answer := GetResponse(req, question, i+1, stat, db)
+				answers = append(answers, answer)
+			}
 		}
 	}
+
+	// Building response based on text from user
+	if len(answers) > 1 { // For multiple feature text
+		for _, result := range answers {
+			req.Response = req.Response + result + "\n\n"
+		}
+	} else if len(answers) == 1 { // Single feature text
+		req.Response = answers[0]
+	}
+
+	// Adding user message to the database
+	AddMessage(req, db)
 }
-func StringMatching(req *structs.Request, db *sql.DB, questions []structs.BotResponse) bool {
+
+func StringMatching(req *structs.Request, text string, db *sql.DB, questions []structs.BotResponse) (string, bool) {
+	var exact bool
+	var first string
+	reqtext := strings.ToLower(text)
 	if req.Method == "KMP" {
 		for _, question := range questions {
 			dbq := strings.ToLower(question.Question)
-			text := strings.ToLower(req.Text)
-			if FeatureStringmatching.KMP(dbq, text) == -2 { // Found Exact Match
-				req.Response = question.Answer
-				return true
+			if FeatureStringmatching.KMP(dbq, reqtext) == -2 { // Found Same string
+				return question.Answer, true
+			} else if FeatureStringmatching.KMP(dbq, reqtext) > -1 {
+				if exact {
+					return "", false // Found more than one exact match
+				} else {
+					first = question.Answer
+					exact = true
+				}
 			}
 		}
 	} else if req.Method == "BoyerMoore" {
 		for _, question := range questions {
 			dbq := strings.ToLower(question.Question)
-			text := strings.ToLower(req.Text)
-			if FeatureStringmatching.BmMatch(dbq, text) == -2 { // Found Exact Match
-				req.Response = question.Answer
-				return true
+			if FeatureStringmatching.BmMatch(dbq, reqtext) == -2 { // Found Same string
+				return question.Answer, true
+			} else if FeatureStringmatching.BmMatch(dbq, reqtext) > -1 {
+				if exact {
+					return "", false // Found more than one exact match
+				} else {
+					first = question.Answer
+					exact = true
+				}
 			}
 		}
 	}
-	return false
+	if exact {
+		return first, true
+	} else {
+		return "", false
+	}
 }
-func LevenshteinController(req *structs.Request, stat *string, db *sql.DB, questions []structs.BotResponse) {
-	// No match found
+func ValidateQuestion(req *structs.Request, text string, db *sql.DB, questions []structs.BotResponse) (string, bool) {
+	var exact bool
+	var first string
+	reqtext := strings.ToLower(text)
+	if req.Method == "KMP" {
+		for _, question := range questions {
+			dbq := strings.ToLower(question.Question)
+			if FeatureStringmatching.KMP(dbq, reqtext) == -2 { // Found Same string
+				return question.Question, true
+			} else if FeatureStringmatching.KMP(dbq, reqtext) > -1 {
+				if exact {
+					return "", false // Found more than one exact match
+				} else {
+					first = question.Question
+					exact = true
+				}
+			}
+		}
+	} else if req.Method == "BoyerMoore" {
+		for _, question := range questions {
+			dbq := strings.ToLower(question.Question)
+			if FeatureStringmatching.BmMatch(dbq, reqtext) == -2 { // Found Same string
+				return question.Question, true
+			} else if FeatureStringmatching.BmMatch(dbq, reqtext) > -1 {
+				if exact {
+					return "", false // Found more than one exact match
+				} else {
+					first = question.Question
+					exact = true
+				}
+			}
+		}
+	}
+	if exact {
+		return first, true
+	} else {
+		return "", false
+	}
+}
+func LevenshteinValidation(text string, db *sql.DB, questions []structs.BotResponse) (string, bool) {
 	qList := []struct {
 		i float64
 		s string
 		a string
 	}{}
+	req := strings.ToLower(text)
 	for _, question := range questions {
-		req := strings.ToLower(req.Text)
 		q := strings.ToLower(question.Question)
 		distance := FeatureStringmatching.LevenshteinDistance(q, req)
 		qList = append(qList, struct {
@@ -113,8 +186,44 @@ func LevenshteinController(req *structs.Request, stat *string, db *sql.DB, quest
 	})
 	if len(qList) != 0 {
 		if qList[0].i > 0.9 {
-			req.Response = qList[0].a
-			return
+			return qList[0].s, true
+		} else {
+			return "", false
+		}
+	} else {
+		return "", false
+	}
+}
+
+func LevenshteinController(text string, stat *string, db *sql.DB, questions []structs.BotResponse) string {
+	// No match found
+	var result string
+	qList := []struct {
+		i float64
+		s string
+		a string
+	}{}
+	req := strings.ToLower(text)
+	for _, question := range questions {
+		q := strings.ToLower(question.Question)
+		distance := FeatureStringmatching.LevenshteinDistance(q, req)
+		qList = append(qList, struct {
+			i float64
+			s string
+			a string
+		}{
+			i: distance,
+			s: question.Question,
+			a: question.Answer,
+		})
+	}
+	// Sort Descending by Percentage value
+	sort.Slice(qList, func(i, j int) bool {
+		return qList[i].i > qList[j].i
+	})
+	if len(qList) != 0 {
+		if qList[0].i > 0.9 {
+			return qList[0].a
 		} else {
 			var x int
 			for i := 0; i < len(qList); {
@@ -125,74 +234,93 @@ func LevenshteinController(req *structs.Request, stat *string, db *sql.DB, quest
 			}
 			if x != 0 {
 				*stat = "404"
-				req.Response = "Pertanyaan tidak ditemukan di database.\nApakah maksud anda:\n"
+				result = "Pertanyaan tidak ditemukan di database.\nApakah maksud anda:\n"
 			} else {
-				req.Response = "Tidak ada pertanyaan tersebut dalam database."
-				return
+				return "Tidak ada pertanyaan tersebut dalam database."
 			}
 
 			if x > 3 {
 				for i := 0; i < 3; i++ {
-					req.Response = req.Response + strconv.Itoa(i+1) + ". " + qList[i].s + "\n"
+					result = result + strconv.Itoa(i+1) + ". " + qList[i].s + "\n"
 				}
 			} else {
 				for i := 0; i < x; i++ {
-					req.Response = req.Response + strconv.Itoa(i+1) + ". " + qList[i].s + "\n"
+					result = result + strconv.Itoa(i+1) + ". " + qList[i].s + "\n"
 				}
 			}
+			return result
 		}
 	} else {
-		req.Response = "Tidak ada pertanyaan tersebut dalam database."
-		return
+		return "Tidak ada pertanyaan tersebut dalam database."
 	}
 }
-func GetResponse(req *structs.Request, index int, stat *string, db *sql.DB) {
+
+func GetResponse(req *structs.Request, text string, index int, stat *string, db *sql.DB) string {
+	var response string
+	var questions []structs.BotResponse
+	questions, err := repository.GetAllBotResponse(db)
+	if err != nil {
+		panic(err)
+	}
 	// Fitur Tambah Pertanyaan
 	if index == 1 {
 		// Get only question and answer from string
-		result := GetPertanyaanJawaban(req.Text)
+		result := GetPertanyaanJawaban(text)
 
 		question := result[0]
 		answer := result[1]
 
+		match, exist := ValidateQuestion(req, question, db, questions)
 		// Checking if question already exist in the table or not
-		if repository.CheckQuestionExist(db, question) {
-			repository.UpdateBotResponse(db, question, answer)
+		if !exist {
+			// Validate with levenshtein
+			match, exist := LevenshteinValidation(question, db, questions)
+			if exist {
+				repository.UpdateBotResponse(db, match, answer)
 
-			// Set bot response
-			req.Response = "Pertanyaan " + question + " sudah ada! jawaban di update ke " + answer
+				// Set bot response
+				response = "Pertanyaan " + question + " sudah ada! jawaban di update ke " + answer
+			} else {
+				repository.InsertBotResponse(db, question, answer)
+
+				// Set bot response
+				response = "Pertanyaan " + question + " telah ditambah"
+			}
 		} else {
-			repository.InsertBotResponse(db, question, answer)
+			repository.UpdateBotResponse(db, match, answer)
 
 			// Set bot response
-			req.Response = "Pertanyaan " + question + " telah ditambah"
+			response = "Pertanyaan " + question + " sudah ada! jawaban di update ke " + answer
 		}
 
 	} else if index == 2 { // Fitur Hapus Pertanyaan
 		// Get only question from string
-		question := GetPertanyaan(req.Text)
+		question := GetPertanyaan(text)
 
 		// Delete question from table
-		err := repository.DeleteBotResponse(db, question)
+		del, exist := StringMatching(req, question, db, questions)
+		if exist {
+			err := repository.DeleteBotResponse(db, del)
+			if err == nil {
+				response = "Pertanyaan " + question + " telah dihapus"
+			}
+		} else {
+			response = "Tidak ada pertanyaan " + question + " pada database!"
+		}
 
 		// Set bot response
-		if err != nil {
-			req.Response = "Tidak ada pertanyaan " + question + " pada database!"
-		} else {
-			req.Response = "Pertanyaan " + question + " telah dihapus"
-		}
 
 	} else if index == 3 { // Fitur Kalendar
 		// Split unnecessary string value
 
-		date := FilterDate(strings.ToLower(req.Text))
+		date := FilterDate(strings.ToLower(text))
 
 		// Set bot response
-		req.Response = FeatureDate.FindDayName(date)
+		response = FeatureDate.FindDayName(date)
 
 	} else if index == 4 { //  Fitur Kalkulator
 
-		equation := FilterEquation(strings.ToLower(req.Text))
+		equation := FilterEquation(strings.ToLower(text))
 		// Get expression result
 		result, err := FeatureCalculator.CalculateExpression(equation)
 
@@ -201,20 +329,21 @@ func GetResponse(req *structs.Request, index int, stat *string, db *sql.DB) {
 		}
 
 		// Set bot response
-		req.Response = result
+		response = result
 
 	} else if index == 5 { // Fitur Pertanyaan Teks
-		var questions []structs.BotResponse
-		questions, err := repository.GetAllBotResponse(db)
-		if err != nil {
-			panic(err)
-		}
 		// String matching with KMP/BoyerMoore based on method request
-		if !StringMatching(req, db, questions) {
-			LevenshteinController(req, stat, db, questions) // no match found, then use levenshtein
+		result, match := StringMatching(req, text, db, questions)
+
+		if !match {
+			result = LevenshteinController(text, stat, db, questions) // no match found, then use levenshtein
 		}
+		response = result
 	}
-	// Adding user message to the database
+	return response
+}
+
+func AddMessage(req *structs.Request, db *sql.DB) {
 
 	// First we check if the historyID is already in database or not
 
