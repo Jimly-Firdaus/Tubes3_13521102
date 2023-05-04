@@ -26,15 +26,6 @@ func KMP(str string, substr string) int {
 	len_sub := len(substr)
 	table := ComputeBorder(substr)
 
-	//  Heuristic simple search
-	// if len_sub == len_str {
-	// 	if str == substr {
-	// 		return 1
-	// 	} else {
-	// 		return -1
-	// 	}
-	// }
-
 	i, j := 0, 0
 	for i < len_str {
 		if substr[j] == str[i] {
@@ -55,16 +46,3 @@ func KMP(str string, substr string) int {
 	}
 	return -1
 }
-
-// Main tester
-// func main() {
-// 	s := "Bagaimana algoritma genetika bekerja?"
-// 	t := "Bagaimana cara kerja algoritma genetika?"
-//
-// 	if KMP(t, s) == -1 {
-// 		fmt.Printf("s is not a suffix\n")
-// 	} else {
-// 		fmt.Printf("s is a suffix.\n")
-// 	}
-// 	fmt.Printf("Starting index: %d", KMP(t, s))
-// }
