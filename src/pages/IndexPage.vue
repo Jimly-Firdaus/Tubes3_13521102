@@ -96,6 +96,7 @@ const fetchHistory = async () => {
   }) 
   messages.forEach((message, index) => {
     message.text = message.text.replace(/\n/g, "<br>");
+    message.response = message.response.replace(/\n/g, "<br>");
   });
   $q.loading.hide();
 };
@@ -129,12 +130,27 @@ const switchConversation = async () => {
   scrollToBottom();
 };
 
+const shiftPressed = ref(false);
+const onKeyUp = (e: KeyboardEvent) => {
+  if (e.key === "Shift") {
+    shiftPressed.value = false;
+  }
+}
+const onKeyDown = (e: KeyboardEvent) => {
+  if (e.key === 'Shift') {
+    shiftPressed.value = true;
+  } else if (e.shiftKey && e.key === 'Enter') {
+    e.preventDefault();
+    userInput.value += '\n';
+  }
+}
+
 const sendMessage = async () => {
-  if (!isResponding.value) {
+  if (!isResponding.value && !shiftPressed.value) {
     if (showGPTinfo.value) {
       showGPTinfo.value = false;
     }
-    const filteredStr = userInput.value.replace(/\n/g, "");
+    const filteredStr = userInput.value.trimEnd();
     const { generateMessageId } = useMessages({ chatHistories });
     isResponding.value = true;
     scrollToBottom();
@@ -144,7 +160,7 @@ const sendMessage = async () => {
       userMessage = new Message(
         messages.length + 1,
         true,
-        filteredStr,
+        filteredStr.replace(/\n/g, "<br>"),
         new Date().toLocaleTimeString(),
         availId
       );
@@ -154,7 +170,7 @@ const sendMessage = async () => {
       userMessage = new Message(
         messages.length + 1,
         true,
-        filteredStr,
+        filteredStr.replace(/\n/g, "<br>"),
         new Date().toLocaleTimeString(),
         currentConversationID.value
       );
@@ -165,7 +181,7 @@ const sendMessage = async () => {
     // Send request to backend
     const request: Request = {
       id: userMessage.getId(),
-      text: userMessage.getText(),
+      text: filteredStr,
       response: "",
       sentTime: userMessage.getSentTime(),
       historyId: userMessage.getHistoryId(),
@@ -173,7 +189,6 @@ const sendMessage = async () => {
 
       method: method.value as "KMP" | "BoyerMoore" | "GPT",
     };
-
     // Clear input
     userInput.value = "";
     if (method.value !== "GPT") {
@@ -223,6 +238,7 @@ const sendMessage = async () => {
       if (response !== undefined) {
         botFullResponse.value = response.data + "\n\n";
         botFullResponse.value += helpfulResponse[random()];
+        botFullResponse.value = botFullResponse.value.replace(/\n/g, "<br>");
       }
     }
 
@@ -479,7 +495,7 @@ onMounted(async () => {
                   :avatar="userAvatar"
                   :stamp="message.getSentTime()"
                 >
-                  <div class="text-lg-body">{{ message.getText() }}</div>
+                  <div class="text-lg-body" v-html="message.getText()"></div>
                 </q-chat-message>
                 <q-chat-message
                   name="BOT"
@@ -516,6 +532,8 @@ onMounted(async () => {
               label="Type your message here"
               class="tw-grow"
               @keyup.enter="sendMessage"
+              @keydown="onKeyDown"
+              @keyup="onKeyUp"
               autogrow
             />
             <div>
