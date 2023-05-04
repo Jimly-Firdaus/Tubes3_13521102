@@ -38,11 +38,3 @@ func LevenshteinDistance(s, t string) float64 {
 	return (float64(1) - (float64(matrix[m][n]) / float64(len(s))))
 }
 
-// tester
-// func main() {
-// 	s := "aba"
-// 	t := "bab"
-// 	distance := levenshteinDistance(s, t)
-// 	percentage := float64(1) - (float64(distance) / float64(len(s)))
-// 	fmt.Printf("The Levenshtein distance between %q and %q is %f with %d mistakes\n", s, t, percentage, distance)
-// }
