@@ -16,7 +16,7 @@ import (
 // Function to get only pertanyaan and jawaban from string
 func GetPertanyaanJawaban(req string) []string {
 	// Replacing unnecessary string value with null
-	substrings := strings.Split(req, "dengan")
+	substrings := strings.Split(req, " dengan")
 
 	substrings[0] = strings.Replace(substrings[0], "Tambahkan pertanyaan ", "", 1)
 	substrings[0] = strings.Replace(substrings[0], "tambahkan pertanyaan ", "", 1)
