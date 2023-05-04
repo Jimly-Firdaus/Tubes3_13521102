@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+  "math"
 )
 
 
@@ -13,6 +14,8 @@ func Precedence(op string) int {
     return 1
   } else if (op == "*" || op == "/") {
     return 2
+  } else if (op == "^") {
+    return 3
   }
   return 0
 }
@@ -20,7 +23,7 @@ func Precedence(op string) int {
 // Get all the number in the string
 func GetNumber(expression string) []string {
   number := strings.FieldsFunc(expression, func(c rune) bool {
-    return c == '-' || c == '+' || c == ' ' || c == '/' || c == '*' || c == '(' || c == ')'
+    return c == '-' || c == '+' || c == ' ' || c == '/' || c == '*' || c == '(' || c == ')' || c == '^'
   })
   return number
 }
@@ -40,11 +43,16 @@ func applyOp(a float64, b float64, op string) (string, error) {
     return strconv.FormatFloat(a * b, 'f', 2, 64), nil
   case "/":
     if (b == 0) {
-      return "", fmt.Errorf("division by zero")
+      return "Error division by zero", fmt.Errorf("division by zero")
     }
     return strconv.FormatFloat(a / b, 'f', 2, 64), nil
+  case "^":
+    if (a == 0) {
+      return "Zero cannot be powered", fmt.Errorf("Zero cannot be powered")
+    }
+    return strconv.FormatFloat(math.Pow(a, b), 'f', 2, 64), nil
   default:
-    return "", fmt.Errorf("invalid operator")
+    return "Invalid operator", fmt.Errorf("Invalid operator")
   }
 }
 
@@ -95,7 +103,7 @@ func CalculateExpression(expression string) (string, error) {
 
         // If the expression contains parenthesis that contains nothing then return error
         if (expression[i-1] == '(') {
-          return "", fmt.Errorf("Invalid Syntax")
+          return "Invalid Syntax", nil
         }
 
         if (operatorStack.IsEmpty()) {
@@ -112,25 +120,25 @@ func CalculateExpression(expression string) (string, error) {
         firstNumber, err := valueStack.Pop()
 
         if (err != nil) {
-          return "", err
+          return "Invalid Syntax", nil
         }
 
         secondNumber, err := valueStack.Pop()
 
         if (err != nil) {
-          return "", err
+          return "Invalid Syntax", nil
         }
 
         operator, err := operatorStack.Pop()
 
         if (err != nil) {
-          return "", err
+          return "Invalid Syntax", nil
         }
 
         hasil, err := applyOp(StringtoFloat(secondNumber), StringtoFloat(firstNumber), operator)
 
         if (err != nil) {
-          return "", err
+          return hasil, nil
         }
 
         valueStack.Push(hasil)
@@ -140,7 +148,7 @@ func CalculateExpression(expression string) (string, error) {
       _, err := operatorStack.Pop()
 
       if (err != nil) {
-        return "", err
+        return "Invalid Syntax", nil
       }
 
     } else { // If tokens for mathematical operations is found then
@@ -162,25 +170,25 @@ func CalculateExpression(expression string) (string, error) {
         firstNumber, err := valueStack.Pop()
 
         if (err != nil) {
-          return "", err
+          return "Invalid Syntax", nil
         }
 
         secondNumber, err := valueStack.Pop()
 
         if (err != nil) {
-          return "", err
+          return "Invalid Syntax", nil
         }
 
         operator, err := operatorStack.Pop()
 
         if (err != nil) {
-          return "", err
+          return "Invalid Syntax", nil
         }
 
         hasil, err := applyOp(StringtoFloat(secondNumber), StringtoFloat(firstNumber), operator)
 
         if (err != nil) {
-          return "", err
+          return hasil, nil
         }
 
         valueStack.Push(hasil)
@@ -199,27 +207,30 @@ func CalculateExpression(expression string) (string, error) {
     firstNumber, err := valueStack.Pop()
 
     if (err != nil) {
-      return "", err
+      return "Invalid Syntax", nil
     }
 
     secondNumber, err := valueStack.Pop()
 
     if (err != nil) {
-      return "", err
+      return "Invalid Syntax", nil
     }
 
     operator, err := operatorStack.Pop()
 
     if (err != nil) {
-      return "", err
+      return "Invalid Syntax", nil
     }
 
     hasil, err := applyOp(StringtoFloat(secondNumber), StringtoFloat(firstNumber), operator)
 
     if (err != nil) {
-      return "", err
+      return hasil, nil
     }
     valueStack.Push(hasil)
   }
-  return valueStack.Peek()
+  if (valueStack.Size() == 1) {
+    return valueStack.Peek()
+  }
+  return "Invalid syntax", nil
 }

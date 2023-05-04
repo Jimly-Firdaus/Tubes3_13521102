@@ -6,28 +6,48 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
-  "net/http"
+	"net/http"
+	"regexp"
 
-  "github.com/aws/aws-lambda-go/events"
-  "github.com/aws/aws-lambda-go/lambda"
+	"github.com/aws/aws-lambda-go/events"
+	"github.com/aws/aws-lambda-go/lambda"
+
+	// "github.com/aws/aws-lambda-go/lambda"
 	_ "github.com/go-sql-driver/mysql"
 )
 
 // Variables to connect to database host
 const (
-  username = "root"
-  host = "containers-us-west-13.railway.app"
-  password = "PNGO6atNekbjjq4g2yPy"
-  port = "6330"
-  databasetype = "railway"
+	username     = "root"
+	host         = "containers-us-west-13.railway.app"
+	password     = "PNGO6atNekbjjq4g2yPy"
+	port         = "6330"
+	databasetype = "railway"
 )
 
-
 var (
-  db *sql.DB
+	db      *sql.DB
+	regexes []*regexp.Regexp
 )
 
 func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResponse, error) {
+	patterns := []string{
+		`^Tambahkan pertanyaan (.*) dengan jawaban (.*)$`,              // Tambah pertanyaan
+		`^Hapus pertanyaan (.*)$`,                                      // Hapus pertanyaan
+		`(?i)^(Hari apa |Hari apakah )?[0-9]{2}/[0-9]{2}/[0-9]{4}\??$`, // Kalendar
+		`(?i)^(Berapakah |Berapa |Hasil dari )?[\d()+\-*\/.^ ]+\??$`,   // Kalkulator
+		`.*`, // Pertanyaan Teks
+	}
+	// Compile the patterns into regex objects
+	regexes := make([]*regexp.Regexp, len(patterns))
+	for i, pattern := range patterns {
+		regex, err := regexp.Compile(pattern)
+		if err != nil {
+			panic(err)
+		}
+		regexes[i] = regex
+	}
+
 	db, err := sql.Open("mysql", database.ConnectDatabase(username, password, host, port, databasetype))
 	if err != nil {
 		fmt.Printf("Error %s while opening database\n", err)
@@ -53,23 +73,38 @@ func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResp
 	case http.MethodGet:
 		fmt.Printf("Request: %+v\n", request)
 		fmt.Println("Hit history get")
-		if request.Path == "/.netlify/functions/endpoint/history" {
-      response, err := controller.GetAllHistoryMessage(request)
-      if err != nil {
-        return response, err
-      }
-      response.Headers["Access-Control-Allow-Origin"] = "*"
-	  fmt.Println("Response headers: %v", response.Headers)
-      fmt.Println("Response body: %s", response.Body)
-	  fmt.Println("Hit history")
-      return response, nil
-    }
+		if request.Path == "/.netlify/functions/endpoint/history-topic" {
+			response, err := controller.GetAllHistoryMessage(request, db) // change this func to return HistoryPayload
+			if err != nil {
+				return response, err
+			}
+			response.Headers["Access-Control-Allow-Origin"] = "*"
+			fmt.Println("Response headers: %v", response.Headers)
+			fmt.Println("Response body: %s", response.Body)
+			fmt.Println("Hit history")
+			return response, nil
+		}
 	case http.MethodPost:
 		if request.Path == "/.netlify/functions/endpoint/getmessage" {
-			return controller.ParseUserMessage(request)
+			return controller.ParseUserMessage(request, db, regexes)
+		}
+		if request.Path == "/.netlify/functions/endpoint/history" {
+			fmt.Println("Hit /history")
+			return controller.GetHistoryByID(request, db) // change this func to return History with given history id from front-end
 		}
 	case http.MethodOptions:
 		if request.Path == "/.netlify/functions/endpoint/getmessage" {
+			headers := map[string]string{
+				"Access-Control-Allow-Origin":  "*",
+				"Access-Control-Allow-Methods": "POST",
+				"Access-Control-Allow-Headers": "Content-Type",
+			}
+			return &events.APIGatewayProxyResponse{
+				StatusCode: http.StatusOK,
+				Headers:    headers,
+			}, nil
+		}
+		if request.Path == "/.netlify/functions/endpoint/history" {
 			headers := map[string]string{
 				"Access-Control-Allow-Origin":  "*",
 				"Access-Control-Allow-Methods": "POST",
@@ -92,13 +127,19 @@ func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResp
 	fmt.Println("HTTP method: %s", request.HTTPMethod)
 	fmt.Println("Resource: %s", request.Resource)
 	fmt.Println("Hit outside switch")
-    return &events.APIGatewayProxyResponse{
-      StatusCode: http.StatusNotImplemented,
-      Body:       http.StatusText(http.StatusNotImplemented),
-    }, nil
+	return &events.APIGatewayProxyResponse{
+		StatusCode: http.StatusNotImplemented,
+		Body:       http.StatusText(http.StatusNotImplemented),
+	}, nil
 }
 
 func main() {
-  // Make the handler available for Remote Procedure Call
-  lambda.Start(handler)
+	// Make the handler available for Remote Procedure Call
+	lambda.Start(handler)
+
+	// expression := "(0.5) ^ (-2\n)"
+
+	// result, _ := FeatureCalculator.CalculateExpression(expression)
+
+	// fmt.Println(result)
 }
