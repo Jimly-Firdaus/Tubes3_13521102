@@ -48,7 +48,7 @@ export interface Request {
   sentTime: string;
   historyId: number;
   historyTimestamp: string;
-  method: 'KMP' | 'BoyerMoore' | 'GPT';
+  method: "KMP" | "BoyerMoore" | "GPT";
 }
 
 export interface MessageInterface extends Message {
@@ -69,16 +69,24 @@ export interface MessageInterface extends Message {
   setHistoryTimestamp(timestamp: string): void;
 }
 
+/**
+ * historyId: history unique id
+ * historyTopic: this history topic
+ */
 export interface HistoryRequest {
   historyId: number;
   historyTopic: string;
 }
 
-export interface HistoryPayload {
-  historyCollection: Array<HistoryRequest>;
-}
-
+/**
+ * Payload from backend, just to match json case
+ * historyId: history unique id
+ * historyTopic: this history topic
+ */
 export interface FetchedHistoryTopic {
   HistoryID: number;
   HistoryTopic: string;
+}
+export interface HistoryPayload {
+  historyCollection: Array<HistoryRequest>;
 }

@@ -69,6 +69,7 @@ const fetchAllTopic = async () => {
   } else{
     chatHistories.historyCollection = [];
   }
+  console.log(chatHistories.historyCollection);
   $q.loading.hide();
 };
 

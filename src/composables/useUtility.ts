@@ -70,22 +70,6 @@ export const useUtility = ({
     return formattedDate;
   };
 
-  // const configuration = new Configuration({
-  //   organization: process.env.OPENAI_ORGANIZATION,
-  //   apiKey: process.env.OPENAI_API_KEY,
-  // });
-  // const openai = new OpenAIApi(configuration);
-  // delete configuration.baseOptions.headers["User-Agent"];
-  // const generateAIAnswer = async (prompt: string) => {
-  //   const completion = await openai.createCompletion({
-  //     model: "text-davinci-003",
-  //     prompt: prompt,
-  //     temperature: 0,
-  //     max_tokens: 67,
-  //   });
-  //   return completion.data.choices[0].text;
-  // };
-
   return {
     animateMessage,
     random,

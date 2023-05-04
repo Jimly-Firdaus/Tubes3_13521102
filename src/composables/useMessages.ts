@@ -26,19 +26,7 @@ export const useMessages = ({
     }
   };
 
-  // const updateHistory = (historyId: number, message: Message) => {
-  //   if (chatHistories) {
-  //     chatHistories.messageHistory.forEach((history, index) => {
-  //       if (history.historyId === historyId) {
-  //         history.conversation.push(message);
-  //         return;
-  //       }
-  //     });
-  //   }
-  // };
-
   return {
     generateMessageId,
-    // updateHistory,
   };
 };
