@@ -102,7 +102,7 @@ func FindDayName(date string) string {
 
   // First we check if a date is valid or not
   if (!CheckDateValid(day, month, year)) {
-    return "Invalid Date"
+    return "Tanggal yang diberikan tidak valid"
   }
 
   // If the date is valid then we proceed to calculate the date's day name using Zeller's Rule
