@@ -13,6 +13,26 @@ import (
 	"strings"
 )
 
+func CreateRegex() []*regexp.Regexp {
+	patterns := []string{
+		`^Tambahkan pertanyaan (.*) dengan jawaban (.*)$`,              // Tambah pertanyaan
+		`^Hapus pertanyaan (.*)$`,                                      // Hapus pertanyaan
+		`(?i)^(Hari apa |Hari apakah )?[0-9]{2}/[0-9]{2}/[0-9]{4}\??$`, // Kalendar
+		`(?i)^(Berapakah |Berapa |Hasil dari )?[\d()+\-*\/.^ ]+\??$`,   // Kalkulator
+		`.*`, // Pertanyaan Teks
+	}
+	// Compile the patterns into regex objects
+	regexes := make([]*regexp.Regexp, len(patterns))
+	for i, pattern := range patterns {
+		regex, err := regexp.Compile(pattern)
+		if err != nil {
+			panic(err)
+		}
+		regexes[i] = regex
+	}
+	return regexes
+}
+
 // Function to get only pertanyaan and jawaban from string
 func GetPertanyaanJawaban(req string) []string {
 	// Replacing unnecessary string value with null
@@ -69,8 +89,11 @@ func FilterMessage(req *structs.Request, stat *string, db *sql.DB, regex []*rege
 
 	// Building response based on text from user
 	if len(answers) > 1 { // For multiple feature text
-		for _, result := range answers {
-			req.Response = req.Response + result + "\n\n"
+		for i, result := range answers {
+			req.Response = req.Response + result
+			if i != len(answers)-1 {
+				req.Response = req.Response + "\n\n"
+			}
 		}
 	} else if len(answers) == 1 { // Single feature text
 		req.Response = answers[0]
