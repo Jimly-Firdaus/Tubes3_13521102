@@ -43,12 +43,12 @@ func applyOp(a float64, b float64, op string) (string, error) {
     return strconv.FormatFloat(a * b, 'f', 2, 64), nil
   case "/":
     if (b == 0) {
-      return "Error division by zero", fmt.Errorf("division by zero")
+      return "Cannot divide by zero", fmt.Errorf("division by zero")
     }
     return strconv.FormatFloat(a / b, 'f', 2, 64), nil
   case "^":
-    if (a == 0) {
-      return "Zero cannot be powered", fmt.Errorf("Zero cannot be powered")
+    if (a == 0 && b == 0) {
+      return "Undefined", fmt.Errorf("Undefined")
     }
     return strconv.FormatFloat(math.Pow(a, b), 'f', 2, 64), nil
   default:
