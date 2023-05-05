@@ -1,0 +1,9 @@
+{
+  "doubleQuotes": true,
+  "tabWidth": 2,
+  "useTabs": false,
+  "semi": true,
+  "arrowParens": "always",
+  "bracketSpacing": true,
+  "printWidth": 80
+}
