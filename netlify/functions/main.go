@@ -31,22 +31,8 @@ var (
 )
 
 func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResponse, error) {
-	patterns := []string{
-		`^Tambahkan pertanyaan (.*) dengan jawaban (.*)$`,              // Tambah pertanyaan
-		`^Hapus pertanyaan (.*)$`,                                      // Hapus pertanyaan
-		`(?i)^(Hari apa |Hari apakah )?[0-9]{2}/[0-9]{2}/[0-9]{4}\??$`, // Kalendar
-		`(?i)^(Berapakah |Berapa |Hasil dari )?[\d()+\-*\/.^ ]+\??$`,   // Kalkulator
-		`.*`, // Pertanyaan Teks
-	}
-	// Compile the patterns into regex objects
-	regexes := make([]*regexp.Regexp, len(patterns))
-	for i, pattern := range patterns {
-		regex, err := regexp.Compile(pattern)
-		if err != nil {
-			panic(err)
-		}
-		regexes[i] = regex
-	}
+	// Getting Regex Expressions
+	regexes := controller.CreateRegex()
 
 	db, err := sql.Open("mysql", database.ConnectDatabase(username, password, host, port, databasetype))
 	if err != nil {

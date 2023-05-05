@@ -13,6 +13,26 @@ import (
 	"strings"
 )
 
+func CreateRegex() []*regexp.Regexp {
+	patterns := []string{
+		`^Tambahkan pertanyaan (.*) dengan jawaban (.*)$`,              // Tambah pertanyaan
+		`^Hapus pertanyaan (.*)$`,                                      // Hapus pertanyaan
+		`(?i)^(Hari apa |Hari apakah )?[0-9]{2}/[0-9]{2}/[0-9]{4}\??$`, // Kalendar
+		`(?i)^(Berapakah |Berapa |Hasil dari )?[\d()+\-*\/.^ ]+\??$`,   // Kalkulator
+		`.*`, // Pertanyaan Teks
+	}
+	// Compile the patterns into regex objects
+	regexes := make([]*regexp.Regexp, len(patterns))
+	for i, pattern := range patterns {
+		regex, err := regexp.Compile(pattern)
+		if err != nil {
+			panic(err)
+		}
+		regexes[i] = regex
+	}
+	return regexes
+}
+
 // Function to get only pertanyaan and jawaban from string
 func GetPertanyaanJawaban(req string) []string {
 	// Replacing unnecessary string value with null
